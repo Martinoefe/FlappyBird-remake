@@ -23,7 +23,7 @@ public class Bird {
         x = FlappyBird.WIDTH/2;
         y = FlappyBird.HEIGHT/2;
         try {
-            img = ImageIO.read(new File("messi.png"));
+            img = ImageIO.read(new File("images/messi.png"));
         }
         catch(IOException e) {
             e.printStackTrace();
