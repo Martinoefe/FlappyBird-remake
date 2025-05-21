@@ -32,6 +32,10 @@ public class GamePanel extends JPanel {
 
         bird.update(g);
 
+        for (PowerUp p : fb.getPowerUps()) {
+            p.draw(g);
+        }
+
         for (Pipe p : pipes) {
             p.draw(g);
         }
