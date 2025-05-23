@@ -4,21 +4,34 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="24aae8ca-0417-4bc4-b094-ef2bd79e5a08" name="Changes" comment="">
+    <list default="true" id="24aae8ca-0417-4bc4-b094-ef2bd79e5a08" name="Changes" comment="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Bird.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Bird.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Defender.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/FlappyBird.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GamePanel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GoldenBall.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GoldenBall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Pipe.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Pipe.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/test/Ing.Software-KiriToro-FlappyBird2/GoldenBallTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/test/Ing.Software-KiriToro-FlappyBird2/GoldenBallTest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/flappybird/Bird.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/Bird.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/flappybird/Defender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/Defender.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/flappybird/FlappyBird.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/FlappyBird.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/flappybird/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/GamePanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/flappybird/GoldenBall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/GoldenBall.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/flappybird/MiniMessi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/MiniMessi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/flappybird/PowerUp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/PowerUp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_unitario.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/flappybird/Pipe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/Pipe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/GoldenBallTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/GoldenBallTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -49,34 +62,40 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.FlappyBird.executor": "Run",
-    "Downloaded.Files.Path.Enabled": "false",
-    "JUnit.All in Ing.Software-KiriToro-FlappyBird2.executor": "Run",
-    "JUnit.BirdTest.executor": "Run",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Test",
-    "kotlin-language-version-configured": "true",
-    "last_directory_selection": "C:/Users/Usuario/IdeaProjects/Ing.Software-KiriToro-FlappyBird2/src/flappybird",
-    "last_opened_file_path": "C:/Users/Usuario/IdeaProjects/Ing.Software-KiriToro-FlappyBird2/diagramas",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.FlappyBird.executor&quot;: &quot;Run&quot;,
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;JUnit.All in Ing.Software-KiriToro-FlappyBird2.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.BirdTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DefenderTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DefenderTest.testDefenderOffScreen.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.DefenderTest.testVerticalMovementWithinBounds.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.GoldenBallTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.PipeTest.executor&quot;: &quot;Run&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Test&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;C:/Users/Usuario/IdeaProjects/Ing.Software-KiriToro-FlappyBird2/src/flappybird&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Usuario/IdeaProjects/Ing.Software-KiriToro-FlappyBird2/images&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Usuario\IdeaProjects\Ing.Software-KiriToro-FlappyBird2\images" />
       <recent name="C:\Users\Usuario\IdeaProjects\Ing.Software-KiriToro-FlappyBird2\diagramas" />
     </key>
   </component>
@@ -102,11 +121,31 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="BirdTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="DefenderTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="Ing.Software-KiriToro-FlappyBird2" />
       <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="BirdTest" />
+      <option name="MAIN_CLASS_NAME" value="DefenderTest" />
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DefenderTest.testDefenderOffScreen" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Ing.Software-KiriToro-FlappyBird2" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="DefenderTest" />
+      <option name="METHOD_NAME" value="testDefenderOffScreen" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DefenderTest.testVerticalMovementWithinBounds" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Ing.Software-KiriToro-FlappyBird2" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="DefenderTest" />
+      <option name="METHOD_NAME" value="testVerticalMovementWithinBounds" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -115,7 +154,9 @@
       <list>
         <item itemvalue="Application.FlappyBird" />
         <item itemvalue="JUnit.All in Ing.Software-KiriToro-FlappyBird2" />
-        <item itemvalue="JUnit.BirdTest" />
+        <item itemvalue="JUnit.DefenderTest" />
+        <item itemvalue="JUnit.DefenderTest.testVerticalMovementWithinBounds" />
+        <item itemvalue="JUnit.DefenderTest.testDefenderOffScreen" />
       </list>
     </recent_temporary>
   </component>
@@ -137,11 +178,34 @@
       <updated>1747267334467</updated>
       <workItem from="1747267334468" duration="303000" />
       <workItem from="1747340975710" duration="1674000" />
-      <workItem from="1747831579337" duration="3535000" />
+      <workItem from="1747831579337" duration="19687000" />
+      <workItem from="1747935491940" duration="1881000" />
+      <workItem from="1748007871214" duration="4783000" />
     </task>
+    <task id="LOCAL-00001" summary="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
+      <option name="closed" value="true" />
+      <created>1747835265311</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747835265311</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
+      <option name="closed" value="true" />
+      <created>1747835315904</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1747835315904</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto" />
+    <option name="LAST_COMMIT_MESSAGE" value="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto" />
   </component>
 </project>
