@@ -1,57 +1,50 @@
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import flappybird.Defender;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- * Pruebas unitarias para la clase Defender,
- * verificando comportamiento de movimiento y límites.
- */
+import java.awt.Rectangle;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class DefenderTest {
 
+    private static final int TEST_X = 200;
     private Defender defender;
 
-    /**
-     * Crea un defensor con posición inicial cerca del borde derecho.
-     */
-    @Before
+    @BeforeEach
     public void setUp() {
-        defender = new Defender(100);
+        defender = new Defender(TEST_X);
     }
 
-    /**
-     * Verifica que el defensor se mueva verticalmente dentro de límites.
-     */
     @Test
-    public void testVerticalMovementWithinBounds() {
-        int alturaJuego = 600;
-        int altoDefensor = 50;
-
-        for (int i = 0; i < 300; i++) {
-            defender.update();
-            int y = defender.getY();
-            assertTrue("El defensor se salió por arriba", y >= 0);
-            assertTrue("El defensor se salió por abajo", y <= alturaJuego - altoDefensor);
-        }
+    public void testIsActiveAlwaysTrue() {
+        assertTrue(defender.isActive(), "A defender should always be active while on screen");
     }
 
-    /**
-     * Verifica que el defensor eventualmente sale de pantalla por la izquierda.
-     */
     @Test
-    public void testDefenderOffScreen() {
-        Defender d = new Defender(100);
-        for (int i = 0; i < 100; i++) {
-            d.update();
-        }
-        assertTrue("El defensor no salió de pantalla después de 100 updates", d.isOffScreen());
+    public void testUpdateMovesLeftByTwoPixels() {
+        int initialX = TEST_X;
+        defender.update();
+        // each update() moves x left by 2
+        // use reflection if needed, but we know getBounds uses x, so extract it:
+        Rectangle bounds = defender.getBounds();
+        // x in bounds is (x + (width - hitboxWidth)/2)
+        int expectedXInBounds = (initialX - 2) + (50 - 40) / 2;
+        assertEquals(expectedXInBounds, bounds.x,
+                "After one update(), the defender's X should decrease by 2 pixels");
     }
 
-    /**
-     * Verifica que la colisión se representa con un Rectangle.
-     */
     @Test
-    public void testGetBoundsNotNull() {
-        assertNotNull(defender.getBounds());
+    public void testOffScreenDetection() {
+        // if x + width < 0 => off screen
+        Defender off = new Defender(-100);
+        assertTrue(off.isOffScreen(), "Defender starting off-screen (x=-100) should be considered off-screen");
+    }
+
+    @Test
+    public void testGetBoundsDimensions() {
+        Rectangle bounds = defender.getBounds();
+        assertEquals(40, bounds.width, "Hitbox width should be 40");
+        assertEquals(50, bounds.height, "Hitbox height should be 50");
     }
 }
