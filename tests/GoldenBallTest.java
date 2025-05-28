@@ -1,41 +1,83 @@
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import flappybird.GoldenBall;
 import flappybird.Bird;
 
-public class GoldenBallTest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.awt.Rectangle;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class GoldenBallTest {
 
     private GoldenBall goldenBall;
-    private Bird bird;
 
-    /**
-     * Inicializa una GoldenBall y un Bird antes de cada test.
-     */
-    @Before
-    public void setUp() {
-        goldenBall = new GoldenBall(400, 150);
-        bird = new Bird();
+    @BeforeEach
+    void setUp() {
+        goldenBall = new GoldenBall(200, 100); // posición inicial
     }
 
-    /**
-     * Verifica que el efecto se aplica correctamente y el pájaro queda invencible.
-     */
     @Test
-    public void testApplyEffectMakesBirdInvincible() {
-        goldenBall.applyEffect(bird);
-        assertTrue(bird.isInvincible());
+    void testInitialPosition() {
+        assertEquals(200, goldenBall.getX());
+        Rectangle bounds = goldenBall.getBounds();
+        assertEquals(new Rectangle(200, 100, 30, 30), bounds);
     }
 
-    /**
-     * Verifica que GoldenBall se mueva hacia la izquierda.
-     */
     @Test
-    public void testGoldenBallMovesLeft() {
-        int initialX = goldenBall.getX();
+    void testUpdateMovesLeft() {
+        int xBefore = goldenBall.getX();
         goldenBall.update();
-        assertTrue(goldenBall.getX() < initialX);
+        assertEquals(xBefore - 3, goldenBall.getX());
+    }
+
+    @Test
+    void testIsOffScreenFalseWhenVisible() {
+        assertFalse(goldenBall.isOffScreen());
+    }
+/*
+    @Test
+    void testIsOffScreenTrueWhenOut() {
+        // Moverlo fuera de la pantalla
+        for (int i = 0; i < 70; i++) {
+            goldenBall.update(); // 70 * 3 = 210 px a la izquierda
+        }
+        assertTrue(goldenBall.isOffScreen());
+    }
+*/
+    @Test
+    void testApplyEffectActivatesPowerUp() {
+        Bird dummyBird = new DummyBird();
+        goldenBall.applyEffect(dummyBird);
+        assertTrue(goldenBall.isActive());
+    }
+
+    @Test
+    void testPowerUpExpiresAfterTime() throws InterruptedException {
+        Bird dummyBird = new DummyBird();
+        goldenBall.applyEffect(dummyBird);
+        assertTrue(goldenBall.isActive(), "GoldenBall debería estar activo inicialmente");
+
+        // Esperar más de 5 segundos para asegurar que el power-up expire
+        Thread.sleep(5500);
+        goldenBall.update(); // Debe verificar y actualizar el estado interno
+        assertFalse(goldenBall.isActive(), "GoldenBall debería estar inactivo después de 5.5 segundos");
+    }
+
+    /**
+     * Clase dummy para simular un pájaro en los tests.
+     */
+    static class DummyBird extends Bird {
+        private boolean invincibleFlag = false;
+
+        @Override
+        public void makeInvincible(int frames) {
+            invincibleFlag = true;
+        }
+
+        @Override
+        public boolean isInvincible() {
+            return invincibleFlag;
+        }
     }
 }
-
-

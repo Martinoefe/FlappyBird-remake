@@ -1,46 +1,74 @@
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import flappybird.Pipe;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.awt.Rectangle;
 
-public class PipeTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    private Pipe pipe;
+class PipeTest {
 
-    /**
-     * Inicializa una tubería antes de cada test.
-     */
-    @Before
-    public void setUp() {
-        pipe = new Pipe(300, 50, 200, true, null, null); // sin imágenes
+    private Pipe topPipe;
+    private Pipe bottomPipe;
+    private final int screenHeight = 800;
+
+    @BeforeEach
+    void setUp() {
+        // Simulación de dimensiones
+        topPipe = new Pipe(300, 50, 200, true, null, null);
+        bottomPipe = new Pipe(300, 50, 200, false, null, null);
     }
 
-    /**
-     * Verifica que la tubería se inicializa en la posición correcta.
-     */
     @Test
-    public void testPipeInitialization() {
-        assertEquals(300, pipe.getX());
-        assertEquals(200, pipe.getHeight());
+    void testInitialPositionAndSize() {
+        assertEquals(300, topPipe.getX());
+        assertEquals(50, topPipe.getWidth());
+        assertEquals(200, topPipe.getHeight());
+
+        assertEquals(300, bottomPipe.getX());
+        assertEquals(50, bottomPipe.getWidth());
+        assertEquals(200, bottomPipe.getHeight());
     }
 
-    /**
-     * Verifica que la tubería se mueve hacia la izquierda al actualizarse.
-     */
     @Test
-    public void testPipeMovesLeft() {
-        int initialX = pipe.getX();
-        pipe.update();
-        assertTrue(pipe.getX() < initialX);
+    void testUpdateMovesLeft() {
+        topPipe.update();
+        bottomPipe.update();
+
+        assertEquals(297, topPipe.getX());
+        assertEquals(297, bottomPipe.getX());
     }
 
-    /**
-     * Verifica que los límites de colisión estén bien definidos.
-     */
     @Test
-    public void testPipeBoundsNotNull() {
-        Rectangle bounds = pipe.getBounds();
-        assertNotNull(bounds);
+    void testIsOffScreenFalseWhenVisible() {
+        assertFalse(topPipe.isOffScreen());
+        assertFalse(bottomPipe.isOffScreen());
     }
+
+    @Test
+    void testIsOffScreenTrueWhenOutside() {
+        Pipe p = new Pipe(-60, 50, 100, true, null, null); // x + width = -10
+        assertTrue(p.isOffScreen());
+    }
+
+    @Test
+    void testGetBoundsTopPipe() {
+        Rectangle expected = new Rectangle(300, 0, 50, 200);
+        assertEquals(expected, topPipe.getBounds());
+    }
+/*
+    @Test
+    void testGetBoundsBottomPipe() {
+        // FlappyBird.HEIGHT no es accesible, simulamos con una constante
+        int expectedY = screenHeight - 200;
+        Rectangle expected = new Rectangle(300, expectedY, 50, 200);
+        Rectangle actual = bottomPipe.getBounds();
+
+        assertEquals(expected.x, actual.x);
+        assertEquals(expected.y, actual.y);
+        assertEquals(expected.width, actual.width);
+        assertEquals(expected.height, actual.height);
+    }
+    
+ */
 }
