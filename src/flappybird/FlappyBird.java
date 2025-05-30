@@ -79,120 +79,154 @@ public class FlappyBird implements ActionListener, KeyListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        panel.repaint(); // redibuja la pantalla
+        panel.repaint();
 
         if (!paused) {
-            bird.physics(); // actualiza la física del pájaro
+            bird.physics();
+            generarTuberias();
+            generarGoldenBall();
+            generarDefensor();
+            actualizarTuberiasYDetectarColisiones();
+            actualizarPowerUps();
+            actualizarDefensores();
+            verificarCaidaDelPajaro();
+            time++;
+            scroll++;
+        }
+    }
 
-            // Genera nuevas tuberías cada cierto tiempo
-            if (scroll % 90 == 0) {
-                int h1 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
-                int h2 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
-                pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h1, true, pipeHead, pipeLength));
-                pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h2, false, pipeHead, pipeLength));
-            }
+    /**
+     * Genera nuevas tuberías cada 90 frames.
+     * Las tuberías se generan con alturas aleatorias dentro de un rango.
+     */
+    private void generarTuberias() {
+        if (scroll % 90 == 0) {
+            int h1 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
+            int h2 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
+            pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h1, true, pipeHead, pipeLength));
+            pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h2, false, pipeHead, pipeLength));
+        }
+    }
 
-            // Genera un GoldenBall si no se solapa con tuberías
-            if (scroll % 700 == 0) {
-                int yPowerUp;
-                boolean validPosition;
-                int attempts = 0;
+    /**
+     * Genera un power-up GoldenBall cada 700 frames.
+     * Se asegura de que no se genere en una posición que colisione con tuberías existentes.
+     */
+    private void generarGoldenBall() {
+        if (scroll % 700 == 0) {
+            int yPowerUp;
+            boolean validPosition;
+            int attempts = 0;
 
-                do {
-                    yPowerUp = (int) (Math.random() * (HEIGHT - 100));
-                    validPosition = true;
-
-                    for (Pipe pipe : pipes) {
-                        Rectangle pipeBounds = pipe.getBounds();
-                        Rectangle ballBounds = new Rectangle(WIDTH, yPowerUp, 40, 40);
-                        if (pipeBounds.intersects(ballBounds)) {
-                            validPosition = false;
-                            break;
-                        }
-                    }
-
-                    attempts++;
-                } while (!validPosition && attempts < 10);
-
-                powerUps.add(new GoldenBall(WIDTH, yPowerUp));
-            }
-
-            // Genera un defensor cada 8 segundos (evita que se superponga con tuberías)
-            if (System.currentTimeMillis() - lastDefenderSpawnTime >= 8000) {
-                int defenderX = WIDTH + 100;
-                boolean overlapsPipe = false;
-
+            do {
+                yPowerUp = (int) (Math.random() * (HEIGHT - 100));
+                validPosition = true;
+                Rectangle ballBounds = new Rectangle(WIDTH, yPowerUp, 40, 40);
                 for (Pipe pipe : pipes) {
-                    if (Math.abs(pipe.getX() - defenderX) < 100) {
-                        overlapsPipe = true;
+                    if (pipe.getBounds().intersects(ballBounds)) {
+                        validPosition = false;
                         break;
                     }
                 }
+                attempts++;
+            } while (!validPosition && attempts < 10);
 
-                if (!overlapsPipe) {
-                    defenders.add(new Defender(defenderX));
-                    lastDefenderSpawnTime = System.currentTimeMillis();
+            powerUps.add(new GoldenBall(WIDTH, yPowerUp));
+        }
+    }
+
+    /**
+     * Genera un defensor cada 8000 ms (8 segundos) si no hay superposición con tuberías.
+     * Los defensores se generan en una posición fija a la derecha de la pantalla.
+     */
+    private void generarDefensor() {
+        if (System.currentTimeMillis() - lastDefenderSpawnTime >= 8000) {
+            int defenderX = WIDTH + 100;
+            boolean overlapsPipe = false;
+            for (Pipe pipe : pipes) {
+                if (Math.abs(pipe.getX() - defenderX) < 100) {
+                    overlapsPipe = true;
+                    break;
                 }
             }
 
-            // Actualización de obstáculos y detección de colisiones
-            boolean game = true;
-            ArrayList<Pipe> toRemove = new ArrayList<>();
-            ArrayList<PowerUp> toRemovePowerUps = new ArrayList<>();
-
-            for (Pipe p : pipes) {
-                p.update();
-                if (p.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
-                    JOptionPane.showMessageDialog(frame, "Te chocaste con una tubería.\nTu puntaje fue: " + time);
-                    game = false;
-                }
-                if (p.isOffScreen()) toRemove.add(p);
+            if (!overlapsPipe) {
+                defenders.add(new Defender(defenderX));
+                lastDefenderSpawnTime = System.currentTimeMillis();
             }
+        }
+    }
 
-            for (PowerUp p : powerUps) {
-                p.update();
-                if (p.getBounds().intersects(bird.getBounds())) {
-                    p.applyEffect(bird);
-                    toRemovePowerUps.add(p);
-                }
-                if (p instanceof GoldenBall && ((GoldenBall) p).isOffScreen()) {
-                    toRemovePowerUps.add(p);
-                }
-            }
-
-            // Actualizar defensores
-            Iterator<Defender> it = defenders.iterator();
-            while (it.hasNext()) {
-                Defender d = it.next();
-                d.update();
-
-                if (d.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
-                    JOptionPane.showMessageDialog(frame, "Te chocaste con un defensor.\nTu puntaje fue: " + time);
-                    paused = true;
-                    resetGame();
-                    return;
-                }
-
-                if (d.isOffScreen()) it.remove();
-            }
-
-            // Eliminar objetos fuera de pantalla
-            pipes.removeAll(toRemove);
-            powerUps.removeAll(toRemovePowerUps);
-
-            // Verificar si el pájaro se cae fuera del mundo
-            if (bird.y > HEIGHT || bird.y + Bird.HEIGHT / 2 < 0) {
-                game = false;
-            }
-
-            // Si hubo colisión o caída, reiniciar juego
-            if (!game) {
+    /**
+     * Actualiza las tuberías, detecta colisiones con el pájaro y elimina las que están fuera de pantalla.
+     * Si hay colisión, muestra un mensaje y reinicia el juego.
+     */
+    private void actualizarTuberiasYDetectarColisiones() {
+        ArrayList<Pipe> toRemove = new ArrayList<>();
+        for (Pipe p : pipes) {
+            p.update();
+            if (p.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
+                JOptionPane.showMessageDialog(frame, "Te chocaste con una tubería.\nTu puntaje fue: " + time);
                 paused = true;
                 resetGame();
+                return;
             }
+            if (p.isOffScreen()) {
+                toRemove.add(p);
+            }
+        }
+        pipes.removeAll(toRemove);
+    }
 
-            time++;   // puntaje
-            scroll++; // avance horizontal
+    /**
+     * Actualiza los power-ups, aplica sus efectos al pájaro si hay colisión,
+     * y elimina los que están fuera de pantalla.
+     */
+    private void actualizarPowerUps() {
+        ArrayList<PowerUp> toRemove = new ArrayList<>();
+        for (PowerUp p : powerUps) {
+            p.update();
+            if (p.getBounds().intersects(bird.getBounds())) {
+                p.applyEffect(bird);
+                toRemove.add(p);
+            }
+            if (p instanceof GoldenBall && ((GoldenBall) p).isOffScreen()) {
+                toRemove.add(p);
+            }
+        }
+        powerUps.removeAll(toRemove);
+    }
+
+    /**
+     * Actualiza los defensores, verifica colisiones con el pájaro,
+     * y elimina los que están fuera de pantalla.
+     */
+    private void actualizarDefensores() {
+        Iterator<Defender> it = defenders.iterator();
+        while (it.hasNext()) {
+            Defender d = it.next();
+            d.update();
+            if (d.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
+                JOptionPane.showMessageDialog(frame, "Te chocaste con un defensor.\nTu puntaje fue: " + time);
+                paused = true;
+                resetGame();
+                return;
+            }
+            if (d.isOffScreen()) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Verifica si el pájaro ha caído fuera de los límites del juego.
+     * Si cae, muestra un mensaje con el puntaje y reinicia el juego.
+     */
+    private void verificarCaidaDelPajaro() {
+        if (bird.y > HEIGHT || bird.y + Bird.HEIGHT / 2 < 0) {
+            JOptionPane.showMessageDialog(frame, "Te caíste.\nTu puntaje fue: " + time);
+            paused = true;
+            resetGame();
         }
     }
 
