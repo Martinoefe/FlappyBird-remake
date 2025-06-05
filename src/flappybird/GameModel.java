@@ -151,24 +151,7 @@ public class GameModel {
             powerUps.add(GoldenBall.getInstancia(WIDTH, yPowerUp));
         }
 
-        // 6) Actualizar GoldenBall y colisión bird↔GoldenBall
-        Iterator<PowerUp> itPU = powerUps.iterator();
-        while (itPU.hasNext()) {
-            PowerUp pu = itPU.next();
-            pu.update();
-            if (pu instanceof GoldenBall) {
-                GoldenBall gb = (GoldenBall) pu;
-                if (gb.getBounds().intersects(bird.getBounds())) {
-                    gb.applyEffect(bird);
-                    itPU.remove();
-                    continue;
-                }
-                if (gb.isOffScreen()) {
-                    itPU.remove();
-                }
-            }
-        }
-
+      
         // 7) Generar Defender cada 8000 ms
         long now = System.currentTimeMillis();
         if (now - lastDefenderSpawnTime >= 8000) {
@@ -208,23 +191,23 @@ public class GameModel {
             lastMiniSpawnTime = now;
         }
 
-        // 10) Actualizar MiniMessi y colisión bird↔MiniMessi
-        itPU = powerUps.iterator();
+          // Actualizar power ups
+        Iterator<PowerUp> itPU = powerUps.iterator();
         while (itPU.hasNext()) {
             PowerUp pu = itPU.next();
-            if (pu instanceof MiniMessi) {
-                MiniMessi mm = (MiniMessi) pu;
-                mm.update();
-                if (mm.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
-                    mm.applyEffect(bird);
+            pu.update();
+                
+                if (pu.getBounds().intersects(bird.getBounds())) {
+                    pu.applyEffect(bird);
                     itPU.remove();
                     continue;
                 }
-                if (mm.isOffScreen()) {
+                if (pu.isOffScreen()) {
                     itPU.remove();
                 }
             }
-        }
+        
+    
 
         // 11) Verificar caída del pájaro (fuera de pantalla vertical)
         if (bird.getY() > HEIGHT || bird.getY() + Bird.HEIGHT/2f < 0) {
