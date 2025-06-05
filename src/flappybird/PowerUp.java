@@ -9,4 +9,5 @@ public interface PowerUp {
     void applyEffect(Bird bird);
     boolean isActive();
     Rectangle getBounds();
+    public boolean isOffScreen();
 }

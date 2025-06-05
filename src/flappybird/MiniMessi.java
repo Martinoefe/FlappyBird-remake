@@ -64,9 +64,11 @@ public class MiniMessi implements PowerUp {
         return new Rectangle(x, y, size, size);
     }
 
+   
     /**
      * Indica si la bebida ya salió de la pantalla (para eliminarla).
      */
+      @Override
     public boolean isOffScreen() {
         return x + size < 0;
     }

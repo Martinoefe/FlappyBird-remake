@@ -91,6 +91,7 @@ public class GoldenBall implements PowerUp {
      * Verifica si el power-up ya salió completamente de la pantalla por la izquierda.
      * @return true si ya no es visible, false en caso contrario
      */
+    @Override
     public boolean isOffScreen() {
         return x + size <= 0;
     }

@@ -102,7 +102,6 @@ public class FlappyBird implements ActionListener, KeyListener {
             actualizarTuberiasYDetectarColisiones();
             actualizarPowerUps();
             actualizarDefensores();
-            actualizarMiniMessis();
             verificarCaidaDelPajaro();
             time++;
             scroll++;
@@ -178,7 +177,7 @@ public class FlappyBird implements ActionListener, KeyListener {
         if (System.currentTimeMillis() - lastMiniSpawnTime >= 10000) {
             int spawnX = WIDTH + 50;
             int spawnY = (int)(Math.random() * (HEIGHT - 50));
-            miniMessis.add(new MiniMessi(spawnX, spawnY));
+            powerUps.add(new MiniMessi(spawnX, spawnY));
             lastMiniSpawnTime = System.currentTimeMillis();
         }
     }
@@ -215,7 +214,7 @@ public class FlappyBird implements ActionListener, KeyListener {
                 p.applyEffect(bird);
                 toRemove.add(p);
             }
-            if (p instanceof GoldenBall && ((GoldenBall) p).isOffScreen()) {
+            if (p.isOffScreen()) {
                 toRemove.add(p);
             }
         }
@@ -242,26 +241,6 @@ public class FlappyBird implements ActionListener, KeyListener {
         }
     }
 
-    /**
-     * Actualiza cada MiniMessi: lo mueve, verifica colisión con el pájaro y lo elimina si corresponde.
-     * Al colisionar, se activa el modo mini en Bird sin mostrar ningún cartel emergente.
-     */
-    private void actualizarMiniMessis() {
-        ArrayList<MiniMessi> toRemove = new ArrayList<>();
-        for (MiniMessi m : miniMessis) {
-            m.update();
-            if (m.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
-                m.applyEffect(bird);
-                toRemove.add(m);
-                // Aquí NO mostramos JOptionPane: al tomar bebida, simplemente se hace mini.
-                continue;
-            }
-            if (m.isOffScreen()) {
-                toRemove.add(m);
-            }
-        }
-        miniMessis.removeAll(toRemove);
-    }
 
     /**
      * Verifica si el pájaro ha caído fuera de los límites superior o inferior del juego.
