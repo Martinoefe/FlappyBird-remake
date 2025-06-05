@@ -16,6 +16,21 @@ public class MiniMessi implements PowerUp {
     private final int size = 40;
     private Image img;
 
+    private static final MiniMessi instancia = new MiniMessi();
+
+    private MiniMessi(){ }
+
+    public static MiniMessi getInstancia(int x, int y){
+        instancia.x = x;
+        instancia.y = y;
+        try {
+            instancia.img = ImageIO.read(new File("images/bebida.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return instancia;
+    }
+
     public MiniMessi(int startX, int startY) {
         this.x = startX;
         this.y = startY;

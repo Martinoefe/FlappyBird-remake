@@ -144,7 +144,7 @@ public class FlappyBird implements ActionListener, KeyListener {
                 attempts++;
             } while (!validPosition && attempts < 10);
 
-            powerUps.add(new GoldenBall(WIDTH, yPowerUp));
+            powerUps.add(GoldenBall.getInstancia(WIDTH, yPowerUp));
         }
     }
 
@@ -177,7 +177,7 @@ public class FlappyBird implements ActionListener, KeyListener {
         if (System.currentTimeMillis() - lastMiniSpawnTime >= 10000) {
             int spawnX = WIDTH + 50;
             int spawnY = (int)(Math.random() * (HEIGHT - 50));
-            powerUps.add(new MiniMessi(spawnX, spawnY));
+            powerUps.add(MiniMessi.getInstancia(spawnX, spawnY));
             lastMiniSpawnTime = System.currentTimeMillis();
         }
     }

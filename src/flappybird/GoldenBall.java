@@ -20,6 +20,21 @@ public class GoldenBall implements PowerUp {
     private long activationTime;      // Tiempo en que se activó el efecto
     private Image img;                // Imagen del Balón de Oro
 
+    private static final GoldenBall instancia = new GoldenBall();
+
+    private GoldenBall(){ }
+
+    public static GoldenBall getInstancia(int x, int y){
+        instancia.x = x;
+        instancia.y = y;
+        try {
+            instancia.img = ImageIO.read(new File("images/balon_de_oro.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return instancia;
+    }
+
     /**
      * Constructor que crea el power-up en una posición determinada.
      * @param x posición inicial en el eje X
