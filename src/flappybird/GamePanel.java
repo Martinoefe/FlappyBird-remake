@@ -4,30 +4,21 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel {
-    private Bird bird;
-    private ArrayList<Pipe> pipes;
-    private FlappyBird fb;
-
-    private Font scoreFont, pauseFont;
+    private GameModel model;
     private BufferedImage backgroundImg;
     private int scrollX = 0;
     private static final int SCROLL_SPEED = 2;
+    private Font scoreFont = new Font("Comic Sans MS", Font.BOLD, 18);
+    private Font pauseFont = new Font("Arial", Font.BOLD, 48);
 
-    public static final int PIPE_W = 50, PIPE_H = 30;
+    public static final int PIPE_W = 50;
 
-    public GamePanel(FlappyBird fb, Bird bird, ArrayList<Pipe> pipes) {
-        this.fb = fb;
-        this.bird = bird;
-        this.pipes = pipes;
-
-        scoreFont = new Font("Comic Sans MS", Font.BOLD, 18);
-        pauseFont = new Font("Arial", Font.BOLD, 48);
-
+    public GamePanel(GameModel model) {
+        this.model = model;
         try {
             backgroundImg = ImageIO.read(new File("images/background.png"));
         } catch (IOException e) {
@@ -36,58 +27,53 @@ public class GamePanel extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Dibujo del fondo (scroll)
+        // 1) Dibujo del fondo con scroll
         if (backgroundImg != null) {
-            int imgWidth = backgroundImg.getWidth();
+            int imgW = backgroundImg.getWidth();
             scrollX -= SCROLL_SPEED;
-            if (scrollX <= -imgWidth) {
+            if (scrollX <= -imgW) {
                 scrollX = 0;
             }
-            for (int x = scrollX; x < FlappyBird.WIDTH; x += imgWidth) {
-                g.drawImage(backgroundImg, x, 0, FlappyBird.WIDTH, FlappyBird.HEIGHT, null);
+            for (int x = scrollX; x < GameModel.WIDTH; x += imgW) {
+                g.drawImage(backgroundImg, x, 0, GameModel.WIDTH, GameModel.HEIGHT, null);
             }
         } else {
             g.setColor(new Color(0, 158, 158));
-            g.fillRect(0, 0, FlappyBird.WIDTH, FlappyBird.HEIGHT);
+            g.fillRect(0, 0, GameModel.WIDTH, GameModel.HEIGHT);
         }
 
-        // Dibujar al pájaro (Bird)
-        bird.update(g);
+        // 2) Dibujar Bird
+        model.getBird().draw(g);
 
-        // Dibujar power-ups GoldenBall (si los hubiera)
-        for (PowerUp p : fb.getPowerUps()) {
+        // 3) Dibujar power-ups (GoldenBall y MiniMessi)
+        for (PowerUp pu : model.getPowerUps()) {
+            pu.draw(g);
+        }
+
+        // 4) Dibujar Pipes
+        for (Pipe p : model.getPipes()) {
             p.draw(g);
         }
 
-        // ─── Dibujar bebidas MiniMessi ───
-        for (MiniMessi m : fb.getMiniMessis()) {
-            m.draw(g);
-        }
-
-        // Dibujar tuberías
-        for (Pipe p : pipes) {
-            p.draw(g);
-        }
-
-        // Dibujar defensores
-        for (Defender d : fb.getDefenders()) {
+        // 5) Dibujar Defenders
+        for (Defender d : model.getDefenders()) {
             d.draw(g);
         }
 
-        // Dibujar puntaje
+        // 6) Dibujar puntaje en esquina superior izquierda
         g.setFont(scoreFont);
         g.setColor(Color.white);
-        g.drawString("Score: " + fb.getScore(), 10, 20);
+        g.drawString("Score: " + model.getScore(), 10, 20);
 
-        // Si está en pausa, mostrar texto
-        if (fb.paused()) {
+        // 7) Si está en pausa, mostrar texto semi-transparente
+        if (model.isPaused()) {
             g.setFont(pauseFont);
             g.setColor(new Color(255, 255, 255, 200));
-            g.drawString("PAUSED", FlappyBird.WIDTH / 2 - 100, FlappyBird.HEIGHT / 2 - 100);
-            g.drawString("PRESS SPACE TO BEGIN", FlappyBird.WIDTH / 2 - 300, FlappyBird.HEIGHT / 2 + 50);
+            g.drawString("PAUSED", GameModel.WIDTH/2 - 100, GameModel.HEIGHT/2 - 100);
+            g.drawString("PRESS SPACE TO BEGIN", GameModel.WIDTH/2 - 300, GameModel.HEIGHT/2 + 50);
         }
     }
 }

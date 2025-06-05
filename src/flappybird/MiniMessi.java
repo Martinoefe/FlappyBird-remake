@@ -9,20 +9,25 @@ import javax.imageio.ImageIO;
 
 /**
  * Power-up “MiniMessi”: al chocar con Bird, le aplica modo mini durante un tiempo determinado.
- * Implementa PowerUp (patrón Strategy).
+ * Se implementa como Singleton para que solo exista una única instancia.
  */
 public class MiniMessi implements PowerUp {
     private int x, y;
     private final int size = 40;
     private Image img;
 
+    // Instancia única (singleton)
     private static final MiniMessi instancia = new MiniMessi();
 
-    private MiniMessi(){ }
+    /** Constructor privado */
+    private MiniMessi() { }
 
-    public static MiniMessi getInstancia(int x, int y){
-        instancia.x = x;
-        instancia.y = y;
+    /**
+     * Retorna la instancia única y la posiciona en (newX, newY), cargando la imagen.
+     */
+    public static MiniMessi getInstancia(int newX, int newY) {
+        instancia.x = newX;
+        instancia.y = newY;
         try {
             instancia.img = ImageIO.read(new File("images/bebida.png"));
         } catch (IOException e) {
@@ -31,19 +36,8 @@ public class MiniMessi implements PowerUp {
         return instancia;
     }
 
-    public MiniMessi(int startX, int startY) {
-        this.x = startX;
-        this.y = startY;
-        try {
-            img = ImageIO.read(new File("images/bebida.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
-     * Se mueve hacia la izquierda. Como ya no necesitamos gestionar duración aquí,
-     * solo movemos la bebida.
+     * Se invoca cada frame: mueve la bebida hacia la izquierda.
      */
     @Override
     public void update() {
@@ -51,7 +45,7 @@ public class MiniMessi implements PowerUp {
     }
 
     /**
-     * Dibuja la bebida si no ha sido recogida aún.
+     * Dibuja la bebida en pantalla.
      */
     @Override
     public void draw(Graphics g) {
@@ -59,31 +53,25 @@ public class MiniMessi implements PowerUp {
     }
 
     /**
-     * En el momento en que Bird colisiona con la bebida:
-     * - Disparamos bird.makeMini(400) para 5 seg (400 frames a 80 FPS).
-     * - No mostramos ningún JOptionPane.
+     * Al colisionar con Bird, invoca bird.makeMini(400) (5 s a 80 FPS).
      */
     @Override
     public void applyEffect(Bird bird) {
         bird.makeMini(400);
     }
 
-    @Override
-    public boolean isActive() {
-        // No se usa un flag “active” aquí; FlappyBird remueve el objeto apenas lo recoge.
-        return false;
-    }
-
+    /**
+     * Hitbox cuadrada de 40×40.
+     */
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, size, size);
     }
 
-   
     /**
-     * Indica si la bebida ya salió de la pantalla (para eliminarla).
+     * Indica si la bebida salió completamente de pantalla (x + size < 0).
      */
-      @Override
+    @Override
     public boolean isOffScreen() {
         return x + size < 0;
     }
