@@ -11,41 +11,53 @@ import javax.swing.Timer;
 
 /**
  * Clase principal del juego Flappy Bird.
- * Controla la lógica del juego, generación de obstáculos y power-ups, físicas del pájaro,
- * y colisiones con objetos.
+ * Controla la lógica del juego, generación de obstáculos y power-ups,
+ * físicas del pájaro, colisiones con objetos y gestión del estado "MiniMessi".
  */
 public class FlappyBird implements ActionListener, KeyListener {
 
     // Constantes generales
-    public static final int FPS = 80, WIDTH = 800, HEIGHT = 600;
+    public static final int FPS = 80;
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 600;
 
     // Componentes y variables del juego
     private Bird bird;
     private JFrame frame;
     private JPanel panel;
     private ArrayList<Pipe> pipes;
-    private int time, scroll; // tiempo transcurrido (puntaje), desplazamiento lateral
-    private Timer t;
     private ArrayList<PowerUp> powerUps;
-    private ArrayList<Defender> defenders = new ArrayList<>();
-    private long lastDefenderSpawnTime = System.currentTimeMillis(); // para control de aparicion de defensores
+    private ArrayList<Defender> defenders;
+    private ArrayList<MiniMessi> miniMessis;
+
+    // Tiempos para controlar generación de defensores y bebidas
+    private long lastDefenderSpawnTime = System.currentTimeMillis();
+    private long lastMiniSpawnTime     = System.currentTimeMillis();
+
+    private int time;    // Tiempo transcurrido (puntaje)
+    private int scroll;  // Desplazamiento lateral
+
+    private Timer t;
     private boolean paused;
 
-    // Imágenes para los tubos
-    private Image pipeHead, pipeLength;
+    // Imágenes para las tuberías
+    private Image pipeHead;
+    private Image pipeLength;
 
     /**
      * Inicializa y lanza la ventana del juego.
      */
     public void go() {
         frame = new JFrame("Flappy Bird");
-        bird = new Bird();
-        pipes = new ArrayList<>();
-        powerUps = new ArrayList<>();
+        bird  = new Bird();
+        pipes       = new ArrayList<>();
+        powerUps    = new ArrayList<>();
+        defenders   = new ArrayList<>();
+        miniMessis  = new ArrayList<>();
 
-        // Cargar imágenes de los tubos
+        // Cargar imágenes de tubería
         try {
-            pipeHead = ImageIO.read(new File("images/pipe.png"));
+            pipeHead   = ImageIO.read(new File("images/pipe.png"));
             pipeLength = ImageIO.read(new File("images/pipe_part.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,24 +70,24 @@ public class FlappyBird implements ActionListener, KeyListener {
         frame.setSize(WIDTH, HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-        frame.addKeyListener(this); // escucha teclado
+        frame.addKeyListener(this);
 
-        paused = true; // el juego comienza pausado
+        paused = true; // El juego inicia pausado
 
-        // Timer que actualiza el juego 80 veces por segundo
+        // Timer que actualiza el juego FPS veces por segundo
         t = new Timer(1000 / FPS, this);
         t.start();
     }
 
     /**
-     * Metodo principal: lanza el juego.
+     * Método principal: lanza el juego.
      */
     public static void main(String[] args) {
         new FlappyBird().go();
     }
 
     /**
-     * Lógica ejecutada en cada frame del juego (80 veces por segundo).
+     * Lógica ejecutada en cada frame del juego (FPS veces por segundo).
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -86,9 +98,11 @@ public class FlappyBird implements ActionListener, KeyListener {
             generarTuberias();
             generarGoldenBall();
             generarDefensor();
+            generarMiniMessi();
             actualizarTuberiasYDetectarColisiones();
             actualizarPowerUps();
             actualizarDefensores();
+            actualizarMiniMessis();
             verificarCaidaDelPajaro();
             time++;
             scroll++;
@@ -97,13 +111,13 @@ public class FlappyBird implements ActionListener, KeyListener {
 
     /**
      * Genera nuevas tuberías cada 90 frames.
-     * Las tuberías se generan con alturas aleatorias dentro de un rango.
+     * Cada par de tuberías se crea con alturas aleatorias dentro de un rango.
      */
     private void generarTuberias() {
         if (scroll % 90 == 0) {
-            int h1 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
-            int h2 = (int) ((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
-            pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h1, true, pipeHead, pipeLength));
+            int h1 = (int)((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
+            int h2 = (int)((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
+            pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h1, true,  pipeHead, pipeLength));
             pipes.add(new Pipe(WIDTH, GamePanel.PIPE_W, h2, false, pipeHead, pipeLength));
         }
     }
@@ -119,7 +133,7 @@ public class FlappyBird implements ActionListener, KeyListener {
             int attempts = 0;
 
             do {
-                yPowerUp = (int) (Math.random() * (HEIGHT - 100));
+                yPowerUp = (int)(Math.random() * (HEIGHT - 100));
                 validPosition = true;
                 Rectangle ballBounds = new Rectangle(WIDTH, yPowerUp, 40, 40);
                 for (Pipe pipe : pipes) {
@@ -137,7 +151,7 @@ public class FlappyBird implements ActionListener, KeyListener {
 
     /**
      * Genera un defensor cada 8000 ms (8 segundos) si no hay superposición con tuberías.
-     * Los defensores se generan en una posición fija a la derecha de la pantalla.
+     * El defensor se ubica inicialmente fuera de pantalla a la derecha.
      */
     private void generarDefensor() {
         if (System.currentTimeMillis() - lastDefenderSpawnTime >= 8000) {
@@ -149,7 +163,6 @@ public class FlappyBird implements ActionListener, KeyListener {
                     break;
                 }
             }
-
             if (!overlapsPipe) {
                 defenders.add(new Defender(defenderX));
                 lastDefenderSpawnTime = System.currentTimeMillis();
@@ -158,8 +171,21 @@ public class FlappyBird implements ActionListener, KeyListener {
     }
 
     /**
-     * Actualiza las tuberías, detecta colisiones con el pájaro y elimina las que están fuera de pantalla.
-     * Si hay colisión, muestra un mensaje y reinicia el juego.
+     * Genera una bebida MiniMessi cada 10000 ms (10 segundos).
+     * El power-up se dibuja como bebida y, al colisionar, hará al pájaro mini sin mostrar diálogo.
+     */
+    private void generarMiniMessi() {
+        if (System.currentTimeMillis() - lastMiniSpawnTime >= 10000) {
+            int spawnX = WIDTH + 50;
+            int spawnY = (int)(Math.random() * (HEIGHT - 50));
+            miniMessis.add(new MiniMessi(spawnX, spawnY));
+            lastMiniSpawnTime = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Actualiza las tuberías: las mueve, verifica colisiones con el pájaro y elimina las que están fuera.
+     * Si el pájaro choca (y no está invencible), se muestra mensaje y se reinicia el juego.
      */
     private void actualizarTuberiasYDetectarColisiones() {
         ArrayList<Pipe> toRemove = new ArrayList<>();
@@ -179,8 +205,7 @@ public class FlappyBird implements ActionListener, KeyListener {
     }
 
     /**
-     * Actualiza los power-ups, aplica sus efectos al pájaro si hay colisión,
-     * y elimina los que están fuera de pantalla.
+     * Actualiza los power-ups GoldenBall: los mueve, aplica efecto al pájaro y elimina si corresponde.
      */
     private void actualizarPowerUps() {
         ArrayList<PowerUp> toRemove = new ArrayList<>();
@@ -198,8 +223,7 @@ public class FlappyBird implements ActionListener, KeyListener {
     }
 
     /**
-     * Actualiza los defensores, verifica colisiones con el pájaro,
-     * y elimina los que están fuera de pantalla.
+     * Actualiza los defensores: los mueve, verifica colisiones con el pájaro y elimina si sale de pantalla.
      */
     private void actualizarDefensores() {
         Iterator<Defender> it = defenders.iterator();
@@ -219,8 +243,29 @@ public class FlappyBird implements ActionListener, KeyListener {
     }
 
     /**
-     * Verifica si el pájaro ha caído fuera de los límites del juego.
-     * Si cae, muestra un mensaje con el puntaje y reinicia el juego.
+     * Actualiza cada MiniMessi: lo mueve, verifica colisión con el pájaro y lo elimina si corresponde.
+     * Al colisionar, se activa el modo mini en Bird sin mostrar ningún cartel emergente.
+     */
+    private void actualizarMiniMessis() {
+        ArrayList<MiniMessi> toRemove = new ArrayList<>();
+        for (MiniMessi m : miniMessis) {
+            m.update();
+            if (m.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
+                m.applyEffect(bird);
+                toRemove.add(m);
+                // Aquí NO mostramos JOptionPane: al tomar bebida, simplemente se hace mini.
+                continue;
+            }
+            if (m.isOffScreen()) {
+                toRemove.add(m);
+            }
+        }
+        miniMessis.removeAll(toRemove);
+    }
+
+    /**
+     * Verifica si el pájaro ha caído fuera de los límites superior o inferior del juego.
+     * Si ocurre, muestra puntaje y reinicia la partida.
      */
     private void verificarCaidaDelPajaro() {
         if (bird.y > HEIGHT || bird.y + Bird.HEIGHT / 2 < 0) {
@@ -231,14 +276,14 @@ public class FlappyBird implements ActionListener, KeyListener {
     }
 
     /**
-     * Devuelve el puntaje actual.
+     * @return el puntaje (número de frames transcurridos).
      */
     public int getScore() {
         return time;
     }
 
     /**
-     * Control de teclas presionadas: salto con ↑, iniciar con ESPACIO.
+     * Manejador de tecla presionada: ↑ para saltar, SPACE para iniciar/reanudar.
      */
     @Override
     public void keyPressed(KeyEvent e) {
@@ -249,38 +294,49 @@ public class FlappyBird implements ActionListener, KeyListener {
         }
     }
 
-    @Override public void keyReleased(KeyEvent e) {}
-    @Override public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyReleased(KeyEvent e) { }
+
+    @Override
+    public void keyTyped(KeyEvent e) { }
 
     /**
-     * Retorna si el juego está pausado.
+     * @return true si el juego está en pausa.
      */
     public boolean paused() {
         return paused;
     }
 
     /**
-     * Acceso a los power-ups actuales.
+     * @return la lista de power-ups GoldenBall actualmente activos.
      */
     public ArrayList<PowerUp> getPowerUps() {
         return powerUps;
     }
 
     /**
-     * Acceso a los defensores actuales.
+     * @return la lista de defensores actualmente activos.
      */
     public ArrayList<Defender> getDefenders() {
         return defenders;
     }
 
     /**
-     * Reinicia el estado del juego a valores iniciales.
+     * @return la lista de bebidas MiniMessi actualmente activas.
+     */
+    public ArrayList<MiniMessi> getMiniMessis() {
+        return miniMessis;
+    }
+
+    /**
+     * Reinicia el estado del juego a los valores iniciales.
      */
     public void resetGame() {
         bird.reset();
         pipes.clear();
         powerUps.clear();
         defenders.clear();
+        miniMessis.clear();
         time = 0;
         scroll = 0;
         paused = true;

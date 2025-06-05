@@ -5,106 +5,144 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-/**
- * Clase que representa al personaje principal del juego (Messi).
- * Controla su posición, física (gravedad, salto), dibujo y estado de invencibilidad.
- */
 public class Bird {
+    public float x, y, vx, vy;
+    public static final int WIDTH = 50;   // Tamaño normal
+    public static final int HEIGHT = 50;  // Tamaño normal
 
-    public float x, y, vx, vy; // Posiciones y velocidades del pájaro en el eje X e Y
-    public static final int WIDTH = 50;  // Ancho de la imagen del pájaro
-    public static final int HEIGHT = 50; // Altura de la imagen del pájaro
+    private Image img;
+    private boolean invincible = false;
+    private int invincibleTimer = 0;
 
-    private Image img;                   // Imagen del personaje (Messi)
-    private boolean invincible = false; // Indica si el personaje está temporalmente invencible
-    private int invincibleTimer = 0;    // Duración restante del estado de invencibilidad (en frames)
+    // ────────── PARA “Mini” ──────────
+    private boolean mini = false;
+    private static final float MINI_SCALE = 0.5f;
+    private int miniTimer = 0;  // Cuenta regresiva (en frames) del modo mini
 
-    /**
-     * Constructor que inicializa la posición del pájaro en el centro de la pantalla y carga la imagen.
-     */
     public Bird() {
         x = FlappyBird.WIDTH / 2;
         y = FlappyBird.HEIGHT / 2;
         try {
-            img = ImageIO.read(new File("images/messi.png")); // Carga la imagen del personaje
+            img = ImageIO.read(new File("images/messi.png"));
         } catch (IOException e) {
-            e.printStackTrace(); // Imprime error si no se puede cargar la imagen
+            e.printStackTrace();
         }
     }
 
     /**
-     * Aplica la física básica al pájaro: movimiento y gravedad.
-     * También reduce el temporizador de invencibilidad si está activo.
+     * Aplica la física básica: movimiento, gravedad e invencibilidad.
+     * También decrementa el miniTimer y desactiva “mini” al terminar.
      */
     public void physics() {
-        x += vx;         // Aplica velocidad horizontal (normalmente cero)
-        y += vy;         // Aplica velocidad vertical
-        vy += 0.5f;      // Aplica gravedad
+        x += vx;
+        y += vy;
+        vy += 0.5f;
 
-        // Manejo de invencibilidad
+        // INVENCIBILIDAD
         if (invincible) {
             invincibleTimer--;
             if (invincibleTimer <= 0) {
                 invincible = false;
             }
         }
-    }
 
-    /**
-     * Dibuja al pájaro en pantalla. Si está invencible, dibuja un contorno amarillo alrededor.
-     * @param g el objeto Graphics sobre el cual se dibuja
-     */
-    public void update(Graphics g) {
-        g.drawImage(img, Math.round(x - WIDTH / 2), Math.round(y - HEIGHT / 2), WIDTH, HEIGHT, null);
-
-        // Dibuja una circunferencia amarilla para indicar invencibilidad
-        if (invincible) {
-            g.setColor(Color.YELLOW);
-            g.drawOval(Math.round(x - WIDTH / 2 - 5), Math.round(y - HEIGHT / 2 - 5), WIDTH + 10, HEIGHT + 10);
+        // MODO MINI: descontar timer y, si llega a cero, restaurar tamaño
+        if (mini) {
+            miniTimer--;
+            if (miniTimer <= 0) {
+                mini = false;
+            }
         }
     }
 
     /**
-     * Simula el salto del pájaro aplicando una velocidad vertical negativa.
+     * Dibuja al Bird. Si está mini, escala al 50%.
      */
+    public void update(Graphics g) {
+        int drawW = WIDTH;
+        int drawH = HEIGHT;
+        if (mini) {
+            drawW = Math.round(WIDTH * MINI_SCALE);
+            drawH = Math.round(HEIGHT * MINI_SCALE);
+        }
+
+        g.drawImage(img,
+                Math.round(x - drawW / 2),
+                Math.round(y - drawH / 2),
+                drawW, drawH,
+                null);
+
+        if (invincible) {
+            g.setColor(Color.YELLOW);
+            g.drawOval(
+                    Math.round(x - drawW / 2 - 5),
+                    Math.round(y - drawH / 2 - 5),
+                    drawW + 10,
+                    drawH + 10
+            );
+        }
+    }
+
     public void jump() {
         vy = -8;
     }
 
     /**
-     * Reinicia la posición y velocidad del pájaro. Se llama cuando comienza una nueva partida.
+     * Reinicia la posición y estado al comenzal partida.
+     * Incluye mini = false para asegurarse de que Bird vuelva a tamaño normal.
      */
     public void reset() {
         x = FlappyBird.WIDTH / 2;
         y = FlappyBird.HEIGHT / 2;
         vx = vy = 0;
+        mini = false;
+        invincible = false;
     }
 
-    /**
-     * Activa el estado de invencibilidad durante cierta cantidad de frames.
-     * @param duration duración de la invencibilidad
-     */
     public void makeInvincible(int duration) {
         invincible = true;
         invincibleTimer = duration;
     }
 
-    /**
-     * Retorna si el pájaro está actualmente en estado de invencibilidad.
-     * @return true si es invencible, false en caso contrario
-     */
     public boolean isInvincible() {
         return invincible;
     }
 
     /**
-     * Retorna el área de colisión (hitbox) del pájaro.
-     * Se usa para detectar colisiones con obstáculos o power-ups.
-     * @return un rectángulo que representa el hitbox del pájaro
+     * Activa el modo “mini” por un número de frames (durationFrames).
+     * Usaremos 400 frames (~5 segundos a 80 FPS).
+     */
+    public void makeMini(int durationFrames) {
+        this.mini = true;
+        this.miniTimer = durationFrames;
+    }
+
+    public boolean isMini() {
+        return mini;
+    }
+
+    /**
+     * Si está mini, devolvemos hitbox reducida; si no, hitbox normal.
      */
     public Rectangle getBounds() {
-        int hitboxWidth = 25;  // Ancho del hitbox
-        int hitboxHeight = 35; // Altura del hitbox
-        return new Rectangle((int) x - hitboxWidth / 2, (int) y - hitboxHeight / 2, hitboxWidth, hitboxHeight);
+        if (mini) {
+            int miniW = Math.round(WIDTH * MINI_SCALE);
+            int miniH = Math.round(HEIGHT * MINI_SCALE);
+            return new Rectangle(
+                    (int) x - miniW / 2,
+                    (int) y - miniH / 2,
+                    miniW,
+                    miniH
+            );
+        } else {
+            int hitboxWidth = 25;
+            int hitboxHeight = 35;
+            return new Rectangle(
+                    (int) x - hitboxWidth / 2,
+                    (int) y - hitboxHeight / 2,
+                    hitboxWidth,
+                    hitboxHeight
+            );
+        }
     }
 }
