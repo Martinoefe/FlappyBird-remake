@@ -112,16 +112,16 @@ public class Bird {
 
     /** Hitbox adaptada: si está mini, se reduce al 50% */
     public Rectangle getBounds() {
+        int hitboxW = 25, hitboxH = 35;
         if (mini) {
-            int w = Math.round(WIDTH * MINI_SCALE);
-            int h = Math.round(HEIGHT * MINI_SCALE);
+            int w = Math.round(hitboxW * MINI_SCALE);
+            int h = Math.round(hitboxH * MINI_SCALE);
             return new Rectangle(
                 Math.round(x - w/2),
                 Math.round(y - h/2),
                 w, h
             );
         } else {
-            int hitboxW = 25, hitboxH = 35; 
             return new Rectangle(
                 Math.round(x - hitboxW/2),
                 Math.round(y - hitboxH/2),

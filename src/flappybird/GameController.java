@@ -13,7 +13,7 @@ public class GameController implements ActionListener, KeyListener {
         model = new GameModel();
         view  = new GamePanel(model);
 
-        frame = new JFrame("Flappy Bird (MVC + Singleton)");
+        frame = new JFrame("Flappy Messi");
         frame.add(view);
         frame.setSize(GameModel.WIDTH, GameModel.HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

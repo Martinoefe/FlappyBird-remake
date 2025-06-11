@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
  */
 public class MiniMessi implements PowerUp {
     private int x, y;
-    private final int size = 40;
+    private final int size = 60;
     private Image img;
 
     // Instancia única (singleton)
