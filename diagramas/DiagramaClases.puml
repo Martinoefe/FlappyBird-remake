@@ -1,150 +1,174 @@
 @startuml
-
-' Package declaration
 package flappybird {
 
- interface PowerUp {
-     + update()
-     + draw(Graphics)
-     + applyEffect(bird : Bird)
-     + isActive() : boolean
-     + getBounds() : Rectangle
- }
+interface PowerUp {
+    + update()
+    + draw(Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
 
- class Bird {
-     + x : float
-     + y : float
-     + vx : float
-     + vy : float
-     + WIDTH : int
-     + HEIGHT : int
-     - img : Image
-     - invincible : boolean
-     - invincibleTimer : int
-     + Bird()
-     + physics()
-     + update(g : Graphics)
-     + jump()
-     + reset()
-     + makeInvincible(duration : int)
-     + isInvincible() : boolean
-     + getBounds() : Rectangle
- }
+class Bird {
+    - x: float
+    - y: float
+    - vx: float
+    - vy: float
+    + WIDTH: int
+    + HEIGHT: int
+    - img: Image
+    - invincible: boolean
+    - invincibleTimer: int
+    - mini: boolean
+    - miniTimer: int
+    + Bird()
+    + updateState()
+    + draw(g: Graphics)
+    + jump()
+    + makeInvincible(durationFrames: int)
+    + makeMini(durationFrames: int)
+    + isInvincible(): boolean
+    + isMini(): boolean
+    + getBounds(): Rectangle
+    + getY(): float
+    + reset()
+}
 
- class Defender {
-     - x : int
-     - y : int
-     - speedY : int
-     - direction : int
-     - image : Image
-     - width : int
-     - height : int
-     - MOVE_LIMIT_TOP : int
-     - MOVE_LIMIT_BOTTOM : int
-     - SCREEN_WIDTH : int
-     + Defender(x : int)
-     + update()
-     + draw(g : Graphics)
-     + isActive() : boolean
-     + getBounds() : Rectangle
-     + applyEffect(bird : Bird)
-     + isOffScreen() : boolean
-     + getY() : int
-     - ajustarVelocidadAleatoria()
- }
+class Defender {
+    - x: float
+    - y: float
+    - speedY: int
+    - direction: int
+    - img: Image
+    + Defender(startX: int)
+    + updateState()
+    + draw(g: Graphics)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+    + adjustRandomSpeed()
+}
 
- class GoldenBall {
-     - x : int
-     - y : int
-     - size : int
-     - active : boolean
-     - activationTime : long
-     - img : Image
-     + GoldenBall(x : int, y : int)
-     + update()
-     + draw(g : Graphics)
-     + applyEffect(bird : Bird)
-     + isActive() : boolean
-     + getBounds() : Rectangle
-     + isOffScreen() : boolean
-     + getX() : int
- }
+class GoldenBall {
+    - x: int
+    - y: int
+    - size: int
+    - active: boolean
+    - activationTime: long
+    - img: Image
+    + getInstancia(newX: int, newY: int): GoldenBall
+    + update()
+    + draw(g: Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
+
+class MiniMessi {
+    - x: int
+    - y: int
+    - size: int
+    - img: Image
+    + getInstancia(newX: int, newY: int): MiniMessi
+    + update()
+    + draw(g: Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
 
 class Pipe {
-     - x : int
-     - width : int
-     - height : int
-     - top : boolean
-     - head : Image
-     - length : Image
-     + Pipe(x : int, width : int, height : int, top : boolean, head : Image, length : Image)
-     + draw(g : Graphics)
-     + update()
-     + isOffScreen() : boolean
-     + getX() : int
-     + getWidth() : int
-     + getBounds() : Rectangle
-     + getHeight() : int
+    - x: float
+    - width: int
+    - height: int
+    - top: boolean
+    - headImg: Image
+    - bodyImg: Image
+    + Pipe(startX: int, width: int, height: int, top: boolean)
+    + updateState()
+    + draw(g: Graphics)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
 }
 
- class FlappyBird {
-     + FPS : int
-     + WIDTH : int
-     + HEIGHT : int
-     - bird : Bird
-     - frame : JFrame
-     - panel : JPanel
-     - pipes : ArrayList<Pipe>
-     - time : int
-     - scroll : int
-     - t : Timer
-     - powerUps : ArrayList<PowerUp>
-     - defenders : ArrayList<Defender>
-     - lastDefenderSpawnTime : long
-     - paused : boolean
-     - pipeHead : Image
-     - pipeLength : Image
-     + go()
-     + main(args : String[])
-     + actionPerformed(e : ActionEvent)
-     + getScore() : int
-     + keyPressed(e : KeyEvent)
-     + keyReleased(e : KeyEvent)
-     + keyTyped(e : KeyEvent)
-     + paused() : boolean
-     + getPowerUps() : ArrayList<PowerUp>
-     + getDefenders() : ArrayList<Defender>
-     + resetGame()
- }
-
- class GamePanel extends JPanel {
-     - bird : Bird
-     - pipes : ArrayList<Pipe>
-     - fb : FlappyBird
-     - scoreFont : Font
-     - pauseFont : Font
-     - backgroundImg : BufferedImage
-     - scrollX : int
-     - SCROLL_SPEED : int
-     + PIPE_W : int
-     + PIPE_H : int
-     + GamePanel(fb : FlappyBird, bird : Bird, pipes : ArrayList<Pipe>)
-     + paintComponent(g : Graphics)
- }
-
+class GameModel {
+    + FPS: int
+    + WIDTH: int
+    + HEIGHT: int
+    - bird: Bird
+    - pipes: List<Pipe>
+    - powerUps: List<PowerUp>
+    - defenders: List<Defender>
+    - score: int
+    - scroll: int
+    - paused: boolean
+    - lastDefenderSpawnTime: long
+    - lastMiniSpawnTime: long
+    - gameOverMessage: String
+    + GameModel()
+    + birdJump()
+    + resetGame()
+    + updateGameFrame()
+    + getBird(): Bird
+    + getPipes(): List<Pipe>
+    + getPowerUps(): List<PowerUp>
+    + getDefenders(): List<Defender>
+    + getScore(): int
+    + isPaused(): boolean
+    + setPaused(p: boolean)
+    - updateScoreAndScroll()
+    - generatePipes()
+    - updatePipesAndCheckCollision()
+    - generateGoldenBall()
+    - generateDefender()
+    - updateDefendersAndCheckCollision()
+    - generateMiniMessi()
+    - updatePowerUps()
+    - checkBirdOutOfBounds()
 }
 
-' Relationships
-Bird --> "uses" Rectangle
-Defender ..|> PowerUp
-GoldenBall ..|> PowerUp
-FlappyBird "1" o-- "1" Bird
-FlappyBird "1" o-- "*" Pipe
-FlappyBird "1" o-- "*" PowerUp
-FlappyBird "1" o-- "*" Defender
+class GameController {
+    - model: GameModel
+    - view: GamePanel
+    - frame: JFrame
+    - timer: Timer
+    + GameController()
+    + actionPerformed(e: ActionEvent)
+    + keyPressed(e: KeyEvent)
+    + keyReleased(e: KeyEvent)
+    + keyTyped(e: KeyEvent)
+    + main(args: String[])
+}
+
+class GamePanel {
+    - model: GameModel
+    - backgroundImg: BufferedImage
+    - scrollX: int
+    - scoreFont: Font
+    - pauseFont: Font
+    + PIPE_W: int
+    + GamePanel(model: GameModel)
+    + paintComponent(g: Graphics)
+}
+
+PowerUp <|.. GoldenBall
+PowerUp <|.. MiniMessi
+PowerUp --> Rectangle
+
+GameModel o-- Bird
+GameModel o-- Pipe
+GameModel o-- PowerUp
+GameModel o-- Defender
+
+GameController o-- GameModel
+GameController o-- GamePanel
+
 GamePanel --|> JPanel
-GamePanel "1" o-- "1" Bird
-GamePanel "1" o-- "*" Pipe
-GamePanel "1" o-- "1" FlappyBird
-Pipe --> FlappyBird : uses HEIGHT
+GamePanel o-- GameModel
+GamePanel o-- Pipe
+GamePanel o-- PowerUp
+GamePanel o-- Defender
+
+Bird --> Rectangle
+Pipe --> Rectangle
+Defender --> Rectangle
 @enduml
