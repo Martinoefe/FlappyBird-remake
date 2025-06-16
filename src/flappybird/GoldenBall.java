@@ -15,14 +15,12 @@ public class GoldenBall implements PowerUp {
 
     private int x, y;                  // Posición del power-up
     private final int size = 30;       // Tamaño (ancho y alto)
-    private boolean active = false;    // Indica si el efecto está en curso
-    private long activationTime;       // Marca el instante en que se activó
     private Image img;                 // Imagen del Balón de Oro
 
     // Instancia única (singleton)
     private static final GoldenBall instancia = new GoldenBall();
 
-    /** Constructor privado para forzar Singleton */
+    /* Constructor privado para forzar Singleton */
     private GoldenBall() { }
 
     /**
@@ -36,7 +34,6 @@ public class GoldenBall implements PowerUp {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        instancia.active = false;        // Reset del estado activo cada vez que se genera
         return instancia;
     }
 
@@ -46,11 +43,6 @@ public class GoldenBall implements PowerUp {
     @Override
     public void update() {
         x -= 3; // Movimiento horizontal hacia la izquierda
-
-        // Si está activo y ya pasaron más de 5 segundos desde activationTime, desactivar
-        if (active && System.currentTimeMillis() - activationTime > 5000) {
-            active = false;
-        }
     }
 
     /**
@@ -67,8 +59,6 @@ public class GoldenBall implements PowerUp {
     @Override
     public void applyEffect(Bird bird) {
         bird.makeInvincible(320);
-        active = true;
-        activationTime = System.currentTimeMillis();
     }
 
     /**
