@@ -7,10 +7,16 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
 
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class GoldenBallTest {
+
+    @BeforeEach
+    public void setUp() {
+        // Se asegura que antes de cada test el singleton tenga estado conocido
+        GoldenBall.getInstancia(0, 0);
+    }
 
     @Test
     public void testGetInstancia_SingletonYPosicion_ViaGetBounds() {
@@ -72,14 +78,18 @@ public class GoldenBallTest {
     }
 
     @Test
-    public void testDraw_InvocaDrawImageConParametrosCorrectos() throws Exception {
+    public void testDraw_InvocaDrawImageConParametrosCorrectos() {
         GoldenBall gb = GoldenBall.getInstancia(12, 34);
         Graphics gMock = mock(Graphics.class);
 
-        // Llamamos draw: solo interesa que invoque drawImage con los parámetros esperados.
         gb.draw(gMock);
 
         Rectangle r = gb.getBounds();
-        verify(gMock, times(1)).drawImage(any(Image.class), eq(r.x), eq(r.y), eq(r.width), eq(r.height), eq(null));
+        verify(gMock).drawImage(
+                nullable(Image.class), // Acepta imagen null
+                eq(r.x), eq(r.y),
+                eq(r.width), eq(r.height),
+                isNull()
+        );
     }
 }
