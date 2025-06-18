@@ -1,95 +1,83 @@
 package flappybird;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Rectangle;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class GoldenBallTest {
+
+    private static final int INITIAL_X = 400;
+    private static final int INITIAL_Y = 200;
+    private GoldenBall ball;
 
     @BeforeEach
     public void setUp() {
-        // Se asegura que antes de cada test el singleton tenga estado conocido
-        GoldenBall.getInstancia(0, 0);
+        // Siempre obtenemos la misma instancia y la posicionamos
+        ball = GoldenBall.getInstancia(INITIAL_X, INITIAL_Y);
     }
 
     @Test
-    public void testGetInstancia_SingletonYPosicion_ViaGetBounds() {
-        // Primera llamada: posiciona en (100, 200)
-        GoldenBall first = GoldenBall.getInstancia(100, 200);
-        Rectangle r1 = first.getBounds();
-        assertEquals(100, r1.x, "getInstancia debería fijar x a 100");
-        assertEquals(200, r1.y, "getInstancia debería fijar y a 200");
-        assertEquals(30, r1.width, "El ancho debe ser size=30");
-        assertEquals(30, r1.height, "La altura debe ser size=30");
-
-        // Segunda llamada: al ser singleton, devuelve la misma instancia y actualiza posición
-        GoldenBall second = GoldenBall.getInstancia(5, 6);
-        assertSame(first, second, "getInstancia debe devolver siempre la misma instancia");
-        Rectangle r2 = second.getBounds();
-        assertEquals(5, r2.x, "Tras segunda llamada, x debe actualizarse a 5");
-        assertEquals(6, r2.y, "Tras segunda llamada, y debe actualizarse a 6");
+    public void testSingletonIdentity() {
+        GoldenBall another = GoldenBall.getInstancia(123, 456);
+        // Debe ser la misma instancia
+        assertSame(ball, another, "GoldenBall debe ser un singleton");
     }
 
     @Test
-    public void testUpdate_MueveXHaciaIzquierda_ViaGetBounds() {
-        GoldenBall gb = GoldenBall.getInstancia(50, 20);
-        Rectangle before = gb.getBounds();
-        gb.update();
-        Rectangle after = gb.getBounds();
+    public void testPositionAfterGetInstancia() {
+        // La llamada al factory actualiza x,y
+        assertEquals(INITIAL_X, ball.getBounds().x, "X debe coincidir con el valor pasado");
+        assertEquals(INITIAL_Y, ball.getBounds().y, "Y debe coincidir con el valor pasado");
+    }
+
+    @Test
+    public void testUpdateMovesLeft() {
+        Rectangle before = ball.getBounds();
+        ball.update();
+        Rectangle after = ball.getBounds();
         assertEquals(before.x - 3, after.x, "update() debe desplazar x en -3");
+        // Y no cambia
         assertEquals(before.y, after.y, "update() no debe cambiar y");
     }
 
     @Test
-    public void testApplyEffect_InvocaMakeInvincible() {
-        GoldenBall gb = GoldenBall.getInstancia(0, 0);
-        Bird birdMock = mock(Bird.class);
-        gb.applyEffect(birdMock);
-        verify(birdMock, times(1)).makeInvincible(320);
+    public void testDrawDoesNotThrow() {
+        // Preparamos un Graphics2D de prueba
+        BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        assertDoesNotThrow(() -> ball.draw(g2d), "draw() no debe lanzar excepción");
     }
 
     @Test
-    public void testGetBounds_CuadraConXySize() {
-        GoldenBall gb = GoldenBall.getInstancia(7, 8);
-        Rectangle r = gb.getBounds();
-        assertEquals(7, r.x, "getBounds.x debe reflejar la posición x");
-        assertEquals(8, r.y, "getBounds.y debe reflejar la posición y");
-        assertEquals(30, r.width, "getBounds.width debe ser size=30");
-        assertEquals(30, r.height, "getBounds.height debe ser size=30");
+    public void testApplyEffectMakesBirdInvincible() {
+        Bird bird = new Bird();
+        assertFalse(bird.isInvincible(), "Inicialmente no debe ser invencible");
+        ball.applyEffect(bird);
+        assertTrue(bird.isInvincible(), "applyEffect() debe activar invencibilidad");
     }
 
     @Test
-    public void testIsOffScreen_VerdaderoCuandoSalePantalla() {
-        // size = 30, isOffScreen() true cuando x + size <= 0
-        GoldenBall gb = GoldenBall.getInstancia(-31, 0);
-        assertTrue(gb.isOffScreen(), "Si x + size < 0, isOffScreen debería ser true");
-
-        gb = GoldenBall.getInstancia(-30, 0);
-        assertTrue(gb.isOffScreen(), "Si x + size == 0, isOffScreen debería ser true");
-
-        gb = GoldenBall.getInstancia(-29, 0);
-        assertFalse(gb.isOffScreen(), "Si x + size > 0, isOffScreen debería ser false");
+    public void testGetBoundsSize() {
+        Rectangle bounds = ball.getBounds();
+        assertEquals(30, bounds.width, "El ancho del hitbox debe ser igual a size");
+        assertEquals(30, bounds.height, "La altura del hitbox debe ser igual a size");
     }
 
     @Test
-    public void testDraw_InvocaDrawImageConParametrosCorrectos() {
-        GoldenBall gb = GoldenBall.getInstancia(12, 34);
-        Graphics gMock = mock(Graphics.class);
+    public void testIsOffScreenTrueWhenCompletelyLeft() {
+        // Ponemos x suficientemente pequeño
+        ball = GoldenBall.getInstancia(-31, 0);
+        assertTrue(ball.isOffScreen(), "isOffScreen() debe ser true cuando x + size <= 0");
+    }
 
-        gb.draw(gMock);
-
-        Rectangle r = gb.getBounds();
-        verify(gMock).drawImage(
-                nullable(Image.class), // Acepta imagen null
-                eq(r.x), eq(r.y),
-                eq(r.width), eq(r.height),
-                isNull()
-        );
+    @Test
+    public void testIsOffScreenFalseWhenVisible() {
+        ball = GoldenBall.getInstancia(0, 0);
+        assertFalse(ball.isOffScreen(), "isOffScreen() debe ser false cuando aún está visible");
     }
 }

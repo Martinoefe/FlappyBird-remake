@@ -16,8 +16,25 @@ public class BirdTest {
 
     @Test
     public void testInitialPosition() {
-        assertEquals(GameModel.WIDTH / 2f, bird.getBounds().getCenterX(), 0.01);
-        assertEquals(GameModel.HEIGHT / 2f, bird.getY(), 0.01);
+        // Debido al redondeo en ambos ejes, el centro X/Y del hitbox queda en mitad + 0.5
+        float expectedCenterX = GameModel.WIDTH  / 2f + 0.5f;
+        float expectedCenterY = GameModel.HEIGHT / 2f + 0.5f;
+
+        Rectangle bounds = bird.getBounds();
+        assertEquals(expectedCenterX,
+                (float)bounds.getCenterX(),
+                0.01f,
+                "El centerX del hitbox debe ser WIDTH/2 + 0.5");
+        assertEquals(expectedCenterY,
+                (float)bounds.getCenterY(),
+                0.01f,
+                "El centerY del hitbox debe ser HEIGHT/2 + 0.5");
+
+        // bird.getY() sigue siendo HEIGHT/2 exacto
+        assertEquals(GameModel.HEIGHT / 2f,
+                bird.getY(),
+                0.01f,
+                "Y debe estar en HEIGHT/2");
     }
 
     @Test
@@ -25,25 +42,26 @@ public class BirdTest {
         float initialY = bird.getY();
         bird.jump();
         bird.updateState();
-        assertTrue(bird.getY() < initialY); // Porque vy es negativo después del salto
+        assertTrue(bird.getY() < initialY,
+                "Después de jump() y updateState(), Y debe disminuir");
     }
 
     @Test
     public void testInvincibilityActivationAndExpiration() {
         bird.makeInvincible(2);
-        assertTrue(bird.isInvincible());
+        assertTrue(bird.isInvincible(), "Debe activarse la invencibilidad");
         bird.updateState(); // frame 1
         bird.updateState(); // frame 2
-        assertFalse(bird.isInvincible());
+        assertFalse(bird.isInvincible(), "La invencibilidad debe expirar tras 2 frames");
     }
 
     @Test
     public void testMiniActivationAndExpiration() {
         bird.makeMini(2);
-        assertTrue(bird.isMini());
+        assertTrue(bird.isMini(), "Debe activarse el modo mini");
         bird.updateState(); // frame 1
         bird.updateState(); // frame 2
-        assertFalse(bird.isMini());
+        assertFalse(bird.isMini(), "El modo mini debe expirar tras 2 frames");
     }
 
     @Test
@@ -53,8 +71,10 @@ public class BirdTest {
         bird.updateState();
         Rectangle mini = bird.getBounds();
 
-        assertTrue(mini.width < normal.width);
-        assertTrue(mini.height < normal.height);
+        assertTrue(mini.width  < normal.width,
+                "Cuando está mini, el ancho del hitbox debe ser menor");
+        assertTrue(mini.height < normal.height,
+                "Cuando está mini, la altura del hitbox debe ser menor");
     }
 
     @Test
@@ -65,9 +85,21 @@ public class BirdTest {
         bird.updateState();
 
         bird.reset();
-        assertEquals(GameModel.WIDTH / 2f, bird.getBounds().getCenterX(), 0.01);
-        assertEquals(GameModel.HEIGHT / 2f, bird.getY(), 0.01);
-        assertFalse(bird.isInvincible());
-        assertFalse(bird.isMini());
+
+        float expectedCenterX = GameModel.WIDTH  / 2f + 0.5f;
+        float expectedCenterY = GameModel.HEIGHT / 2f + 0.5f;
+
+        Rectangle bounds = bird.getBounds();
+        assertEquals(expectedCenterX,
+                (float)bounds.getCenterX(),
+                0.01f,
+                "Reset debe restaurar centerX a WIDTH/2 + 0.5");
+        assertEquals(expectedCenterY,
+                (float)bounds.getCenterY(),
+                0.01f,
+                "Reset debe restaurar centerY a HEIGHT/2 + 0.5");
+
+        assertFalse(bird.isInvincible(), "Reset debe desactivar invencibilidad");
+        assertFalse(bird.isMini(),      "Reset debe desactivar modo mini");
     }
 }

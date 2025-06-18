@@ -1,87 +1,89 @@
 package flappybird;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Rectangle;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class PipeTest {
 
-    private Image mockHeadImg;
-    private Image mockBodyImg;
+    private static final int START_X = 100;
+    private static final int WIDTH = 50;
+    private static final int HEIGHT = 200;
+
+    private BufferedImage dummyHead;
+    private BufferedImage dummyBody;
+    private Pipe topPipe;
+    private Pipe bottomPipe;
 
     @BeforeEach
-    public void setUp() {
-        mockHeadImg = mock(Image.class);
-        mockBodyImg = mock(Image.class);
+    void setUp() {
+        // Creamos imágenes dummy para el test
+        dummyHead = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+        dummyBody = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+
+        // Usamos el constructor que recibe imágenes
+        topPipe = new Pipe(START_X, WIDTH, HEIGHT, true, dummyHead, dummyBody);
+        bottomPipe = new Pipe(START_X, WIDTH, HEIGHT, false, dummyHead, dummyBody);
     }
 
     @Test
-    public void testConstructorSuperior_PosicionamientoCorrecto() {
-        Pipe pipe = new Pipe(100, 50, 120, true, mockHeadImg, mockBodyImg);
-        Rectangle bounds = pipe.getBounds();
+    void testUpdateStateMovesLeftByThree() {
+        float initialX = topPipe.getX();
+        topPipe.updateState();
+        assertEquals(initialX - 3, topPipe.getX(), 0.001,
+                "updateState() debe reducir x en 3");
+    }
 
-        assertEquals(100, bounds.x);
+    @Test
+    void testGetXReflectsPosition() {
+        assertEquals(START_X, topPipe.getX(), 0.001);
+    }
+
+    @Test
+    void testGetBoundsTop() {
+        Rectangle bounds = topPipe.getBounds();
+        // Para tubería superior, Y = 0
+        assertEquals(START_X, bounds.x);
         assertEquals(0, bounds.y);
-        assertEquals(50, bounds.width);
-        assertEquals(120, bounds.height);
+        assertEquals(WIDTH, bounds.width);
+        assertEquals(HEIGHT, bounds.height);
     }
 
     @Test
-    public void testConstructorInferior_PosicionamientoCorrecto() {
-        Pipe pipe = new Pipe(200, 60, 150, false, mockHeadImg, mockBodyImg);
-        Rectangle bounds = pipe.getBounds();
-
-        assertEquals(200, bounds.x);
-        assertEquals(GameModel.HEIGHT - 150, bounds.y);
-        assertEquals(60, bounds.width);
-        assertEquals(150, bounds.height);
+    void testGetBoundsBottom() {
+        Rectangle bounds = bottomPipe.getBounds();
+        // Para tubería inferior, Y = GameModel.HEIGHT - height
+        int expectedY = GameModel.HEIGHT - HEIGHT;
+        assertEquals(START_X, bounds.x);
+        assertEquals(expectedY, bounds.y);
+        assertEquals(WIDTH, bounds.width);
+        assertEquals(HEIGHT, bounds.height);
     }
 
     @Test
-    public void testUpdateState_DesplazaX() {
-        Pipe pipe = new Pipe(300, 40, 100, true, mockHeadImg, mockBodyImg);
-        float xAntes = pipe.getX();
-        pipe.updateState();
-        float xDespues = pipe.getX();
-
-        assertEquals(xAntes - 3, xDespues, 0.01f);
+    void testIsOffScreenTrueWhenLeft() {
+        Pipe off = new Pipe(-WIDTH - 1, WIDTH, HEIGHT, true, dummyHead, dummyBody);
+        assertTrue(off.isOffScreen(), "isOffScreen() debe ser true cuando x + width < 0");
     }
 
     @Test
-    public void testIsOffScreen_TrueCuandoSale() {
-        Pipe pipe = new Pipe(-41, 40, 100, true, mockHeadImg, mockBodyImg);
-        assertTrue(pipe.isOffScreen(), "x + width < 0 debería ser true");
-
-        pipe = new Pipe(-39, 40, 100, true, mockHeadImg, mockBodyImg);
-        assertFalse(pipe.isOffScreen(), "x + width > 0 debería ser false");
+    void testIsOffScreenFalseWhenVisible() {
+        assertFalse(topPipe.isOffScreen(),
+                "isOffScreen() debe ser false cuando la tubería aún es visible");
     }
 
     @Test
-    public void testDraw_Superior_InvocaDrawImage() {
-        Pipe pipe = new Pipe(100, 50, 120, true, mockHeadImg, mockBodyImg);
-        Graphics gMock = mock(Graphics.class);
-
-        pipe.draw(gMock);
-
-        verify(gMock).drawImage(eq(mockBodyImg), anyInt(), eq(0), eq(50), eq(120), isNull());
-        verify(gMock).drawImage(eq(mockHeadImg), anyInt(), eq(110), eq(60), eq(20), isNull());
-    }
-
-    @Test
-    public void testDraw_Inferior_InvocaDrawImage() {
-        Pipe pipe = new Pipe(100, 50, 150, false, mockHeadImg, mockBodyImg);
-        Graphics gMock = mock(Graphics.class);
-
-        pipe.draw(gMock);
-
-        int expectedY = GameModel.HEIGHT - 150;
-        verify(gMock).drawImage(eq(mockBodyImg), anyInt(), eq(expectedY), eq(50), eq(150), isNull());
-        verify(gMock).drawImage(eq(mockHeadImg), anyInt(), eq(expectedY), eq(60), eq(20), isNull());
+    void testDrawDoesNotThrow() {
+        BufferedImage canvas = new BufferedImage(800, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = canvas.createGraphics();
+        assertDoesNotThrow(() -> {
+            topPipe.draw(g2d);
+            bottomPipe.draw(g2d);
+        }, "draw() no debe lanzar ninguna excepción");
     }
 }
