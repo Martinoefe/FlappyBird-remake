@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="24aae8ca-0417-4bc4-b094-ef2bd79e5a08" name="Changes" comment="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Bird.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Bird.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Defender.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Defender.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GamePanel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GoldenBall.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/GoldenBall.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/MiniMessi.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/MiniMessi.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Pipe.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Ing.Software-KiriToro-FlappyBird2/flappybird/Pipe.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/BirdTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/BirdTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/DefenderTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/DefenderTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/GameControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/GameControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/GoldenBallTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/GoldenBallTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/MiniMessiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/MiniMessiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/flappybird/PipeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flappybird/PipeTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="24aae8ca-0417-4bc4-b094-ef2bd79e5a08" name="Changes" comment="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -102,8 +88,8 @@
       <recent name="C:\Users\Usuario\IdeaProjects\Ing.Software-KiriToro-FlappyBird2\diagramas" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.PipeTest">
-    <configuration name="GameControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.GameModelTest">
+    <configuration name="GameModelTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="Ing.Software-KiriToro-FlappyBird2" />
       <extension name="coverage">
         <pattern>
@@ -112,7 +98,7 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="flappybird" />
-      <option name="MAIN_CLASS_NAME" value="flappybird.GameControllerTest" />
+      <option name="MAIN_CLASS_NAME" value="flappybird.GameModelTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -179,7 +165,7 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="JUnit.GameControllerTest" />
+      <item itemvalue="JUnit.GameModelTest" />
       <item itemvalue="JUnit.GamePanelTest" />
       <item itemvalue="JUnit.GoldenBallTest" />
       <item itemvalue="JUnit.MiniMessiTest" />
@@ -187,11 +173,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.GameModelTest" />
         <item itemvalue="JUnit.PipeTest" />
         <item itemvalue="JUnit.MiniMessiTest" />
         <item itemvalue="JUnit.GoldenBallTest" />
         <item itemvalue="JUnit.GamePanelTest" />
-        <item itemvalue="JUnit.GameControllerTest" />
       </list>
     </recent_temporary>
   </component>
@@ -220,7 +206,7 @@
       <workItem from="1749473932723" duration="23000" />
       <workItem from="1749581336248" duration="1196000" />
       <workItem from="1749677036950" duration="3124000" />
-      <workItem from="1750273851064" duration="3968000" />
+      <workItem from="1750273851064" duration="4621000" />
     </task>
     <task id="LOCAL-00001" summary="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
       <option name="closed" value="true" />
