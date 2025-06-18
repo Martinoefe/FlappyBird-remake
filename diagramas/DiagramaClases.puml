@@ -152,7 +152,6 @@ class GamePanel {
 
 PowerUp <|.. GoldenBall
 PowerUp <|.. MiniMessi
-PowerUp --> Rectangle
 
 GameModel o-- Bird
 GameModel o-- Pipe
@@ -163,12 +162,12 @@ GameController o-- GameModel
 GameController o-- GamePanel
 
 GamePanel --|> JPanel
-GamePanel o-- GameModel
-GamePanel o-- Pipe
-GamePanel o-- PowerUp
-GamePanel o-- Defender
+GamePanel --> GameModel
 
 Bird --> Rectangle
 Pipe --> Rectangle
 Defender --> Rectangle
+PowerUp --> Rectangle
+
+}
 @enduml
