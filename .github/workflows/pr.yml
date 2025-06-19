@@ -11,7 +11,8 @@ jobs:
     name: Documentation (Doxygen)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Run Documentation Action
         uses: ./.github/actions/documentation
 
@@ -19,7 +20,8 @@ jobs:
     name: Style Check (clang-format)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Run Style Action
         uses: ./.github/actions/style
 
@@ -31,17 +33,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run Build Action
-        # Invocamos la acción composite de build
+        # Invoca la acción composite de build
         uses: ./.github/actions/build
         with:
-          # Pasamos los inputs obligatorios que la acción composite usará
           distribution: 'temurin'
           java-version: '11'
-          # Opcional: comando de build, por defecto Maven. Ajusta si usas IntelliJ CLI:
-          # Si tu acción build.yml está preparada para IntelliJ CLI, cambia aquí.
+          # Ajusta este comando según tu proyecto. Por defecto Maven:
           build-command: 'mvn -B clean compile'
-          # Si necesitas argumentos adicionales, podrías definir más inputs en action.yml.
-  
+
   tests:
     name: Tests & Coverage
     runs-on: ubuntu-latest
@@ -52,4 +51,6 @@ jobs:
       - name: Run Tests Action
         uses: ./.github/actions/tests
         with:
-          # Suponie
+          distribution: 'temurin'
+          java-version: '11'
+          test-command: 'mvn test'
