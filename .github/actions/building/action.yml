@@ -1,5 +1,5 @@
 name: 'Building Action'
-description: 'Genera un pom.xml dinámico (incluyendo recursos como imágenes) y ejecuta GameController mediante Maven.'
+description: 'Genera un pom.xml dinámico (incluyendo recursos como images/) y ejecuta GameController mediante Maven.'
 
 inputs:
   distribution:
@@ -20,8 +20,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # 1. Generar el pom.xml dinámico ANTES de setup-java con cache, 
-    #    para que actions/setup-java@v3 encuentre el pom.xml al aplicar cache :contentReference[oaicite:0]{index=0}.
+    # 1. Generar pom.xml dinámico ANTES de setup-java con cache:
+    #    para que actions/setup-java@v3 pueda encontrar el pom.xml y no falle:
     - name: Generar pom.xml dinámico con recursos
       shell: bash
       run: |
@@ -42,7 +42,7 @@ runs:
             <jacoco.plugin.version>0.8.10</jacoco.plugin.version>
           </properties>
           <dependencies>
-            <!-- Incluimos JUnit en scope test para que el POM sea válido si en tests usamos mvn test -->
+            <!-- Incluimos JUnit en scope test para que mvn test en job de tests funcione -->
             <dependency>
               <groupId>org.junit.jupiter</groupId>
               <artifactId>junit-jupiter</artifactId>
@@ -51,14 +51,21 @@ runs:
             </dependency>
           </dependencies>
           <build>
-            <!-- Directorios personalizados de fuentes y tests -->
+            <!-- Directorios personalizados de código y tests -->
             <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
             <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
 
-            <!-- Incluir la carpeta de imágenes como recurso, para que ImageIO.read getResource(...) no devuelva null :contentReference[oaicite:1]{index=1} -->
+            <!-- Incluir carpeta de imágenes como recurso: 
+                 copiamos toda la carpeta images/ preservando la subcarpeta en classpath 
+                 para que getResource("/images/xxx.png") encuentre el archivo :contentReference[oaicite:0]{index=0} -->
             <resources>
               <resource>
-                <directory>${project.basedir}/images</directory>
+                <!-- Directorio raíz para copiar; al incluir images/**, 
+                     se preserva la carpeta images en target/classes/images/... -->
+                <directory>${project.basedir}</directory>
+                <includes>
+                  <include>images/**</include>
+                </includes>
               </resource>
             </resources>
 
@@ -78,7 +85,7 @@ runs:
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                  <!-- Este mainClass es el default en POM, pero el comando Maven que reciba build-command puede sobreescribir vía -Dexec.mainClass -->
+                  <!-- MainClass por defecto, pero se puede sobreescribir con -Dexec.mainClass -->
                   <mainClass>flappybird.GameController</mainClass>
                 </configuration>
               </plugin>
@@ -106,7 +113,7 @@ runs:
         echo "POM dinámico (incluyendo carpeta images/) generado:"
         cat pom.xml
 
-    # 2. Setup de Java y cache de Maven. Ahora pom.xml existe, así cache funcionará sin error “No file matched to [**/pom.xml]” :contentReference[oaicite:2]{index=2}.
+    # 2. Setup Java y cache de Maven; ahora que pom.xml existe, el cache no fallará:
     - name: Setup Java y Maven (cache de Maven)
       uses: actions/setup-java@v3
       with:
@@ -121,16 +128,14 @@ runs:
         java -version
         mvn -v
 
-    # 4. Ejecutar el comando de build. 
+    # 4. Ejecutar el comando de build
     - name: Ejecutar build-command con Maven
       shell: bash
       run: |
-        echo "Ejecutando: mvn {{ inputs.build-command }}"
-        # Primero compilamos
+        echo "Ejecutando: mvn ${{ inputs.build-command }}"
         mvn compile
-        # Luego ejecutamos la parte indicada
         mvn ${{ inputs.build-command }}
-        # Si tu aplicación abre GUI y necesitas framebuffer, podrías envolver con xvfb-run:
+        # Si la aplicación abre GUI, envolver en xvfb-run si se necesita:
         # if command -v xvfb-run >/dev/null; then
         #   xvfb-run mvn ${{ inputs.build-command }}
         # else
