@@ -1,0 +1,21 @@
+name: Tests
+description: Run JUnit tests and collect coverage with Jacoco.
+runs:
+  using: "composite"
+  steps:
+    - name: Install Maven
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y maven
+
+    - name: Run tests with coverage
+      run: mvn -B test jacoco:report
+
+    - name: Publish coverage report
+      run: |
+        COVERAGE=$(grep -Po 'INSTRUCTION.*?\\s+\\K[0-9]+(?=%)' target/site/jacoco/jacoco.csv)
+        echo "Coverage: $COVERAGE%"
+        if [ "$COVERAGE" -lt 90 ]; then
+          echo "Coverage below threshold!"
+          exit 1
+        fi
