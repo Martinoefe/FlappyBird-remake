@@ -1,26 +1,38 @@
-name: Documentation
-description: Generate and validate Doxygen docs.
+name: "Doc check"
+description: "Verifica que el código Java esté documentado según Doxyfile"
+
 runs:
   using: "composite"
   steps:
-    - name: Ensure Doxyfile exists
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instalar Doxygen y Graphviz
       run: |
-        if [ ! -f Doxyfile ]; then
-          echo "Creating minimal Doxyfile…"
-          cat > Doxyfile <<EOF
-          PROJECT_NAME = "FlappyMessi"
-          OUTPUT_DIRECTORY = docs
-          INPUT = src/flappybird
-          RECURSIVE = YES
-          GENERATE_LATEX = NO
-          EOF
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+
+    - name: Ejecutar Doxygen en modo chequeo
+      shell: bash
+      run: |
+        DOXFILE="$GITHUB_WORKSPACE/Doxyfile"
+        ERRFILE="$GITHUB_WORKSPACE/dox_errors.txt"
+
+        # Ejecuta doxygen y captura stderr en ERRFILE
+        doxygen "$DOXFILE" 2> "$ERRFILE" 1>/dev/null
+
+        if [ -s "$ERRFILE" ]; then
+          echo "❌ Errores de documentación detectados:"
+          cat "$ERRFILE"
+          exit 1
+        else
+          echo "✅ Toda la documentación cumple con Doxyfile."
         fi
 
-    - name: Install doxygen
-      run: sudo apt-get update && sudo apt-get install -y doxygen
-
-    - name: Run doxygen
-      run: doxygen Doxyfile
-
-    - name: Check that docs/index.html was generated
-      run: test -f docs/html/index.html
+    - name: Subir errores (si los hay)
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: doxygen-errors
+        path: dox_errors.txt
+        retention-days: 1
