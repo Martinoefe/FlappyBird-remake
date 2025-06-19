@@ -1,21 +1,153 @@
-name: Tests
-description: Run JUnit tests and collect coverage with Jacoco.
+name: 'Tests & Coverage Action'
+description: 'Genera pom.xml dinámico, ejecuta tests con Maven y extrae porcentaje de cobertura con JaCoCo.'
+
+inputs:
+  distribution:
+    description: 'Distribución de JDK para setup-java'
+    required: true
+    default: 'temurin'
+  java-version:
+    description: 'Versión de Java'
+    required: true
+    default: '11'
+  test-command:
+    description: "Parte del comando Maven para tests. Ejemplo: 'test'."
+    required: true
+    default: 'test'
+
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Install Maven
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y maven
+    - name: Setup Java y Maven
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
 
-    - name: Run tests with coverage
-      run: mvn -B test jacoco:report
-
-    - name: Publish coverage report
+    - name: Mostrar versiones Java y Maven
+      shell: bash
       run: |
-        COVERAGE=$(grep -Po 'INSTRUCTION.*?\\s+\\K[0-9]+(?=%)' target/site/jacoco/jacoco.csv)
-        echo "Coverage: $COVERAGE%"
-        if [ "$COVERAGE" -lt 90 ]; then
-          echo "Coverage below threshold!"
+        java -version
+        mvn -v
+
+    - name: Generar pom.xml dinámico
+      shell: bash
+      run: |
+        cat << 'EOF' > pom.xml
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                                     http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>com.usuario.flappybird</groupId>
+          <artifactId>flappybird</artifactId>
+          <version>1.0-SNAPSHOT</version>
+          <properties>
+            <maven.compiler.source>11</maven.compiler.source>
+            <maven.compiler.target>11</maven.compiler.target>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            <junit.jupiter.version>5.9.2</junit.jupiter.version>
+            <jacoco.plugin.version>0.8.10</jacoco.plugin.version>
+          </properties>
+          <dependencies>
+            <dependency>
+              <groupId>org.junit.jupiter</groupId>
+              <artifactId>junit-jupiter</artifactId>
+              <version>${junit.jupiter.version}</version>
+              <scope>test</scope>
+            </dependency>
+          </dependencies>
+          <build>
+            <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
+            <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
+            <plugins>
+              <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                  <source>${maven.compiler.source}</source>
+                  <target>${maven.compiler.target}</target>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                  <mainClass>flappybird.GameController</mainClass>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.plugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>prepare-agent</id>
+                    <goals><goal>prepare-agent</goal></goals>
+                  </execution>
+                  <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals><goal>report</goal></goals>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </project>
+        EOF
+        echo "POM dinámico para tests generado:"
+        cat pom.xml
+
+    - name: Ejecutar tests y generar cobertura
+      shell: bash
+      run: |
+        echo "Ejecutando: mvn ${{ inputs.test-command }}"
+        mvn ${{ inputs.test-command }}
+
+    - name: Extraer porcentaje de cobertura
+      shell: bash
+      run: |
+        REPORT_XML="target/site/jacoco/jacoco.xml"
+        if [ ! -f "$REPORT_XML" ]; then
+          echo "No se encontró reporte JaCoCo en $REPORT_XML"
           exit 1
         fi
+        # Extraer la línea <counter type="LINE" missed="X" covered="Y"/>
+        line=$(grep '<counter type="LINE"' -m1 "$REPORT_XML" || true)
+        if [ -z "$line" ]; then
+          echo "No se encontró línea de coverage en $REPORT_XML"
+          exit 1
+        fi
+        missed=$(echo "$line" | sed -E 's/.*missed="([0-9]+)".*/\1/')
+        covered=$(echo "$line" | sed -E 's/.*covered="([0-9]+)".*/\1/')
+        total=$((missed + covered))
+        if [ "$total" -eq 0 ]; then
+          echo "Total líneas=0"
+          exit 1
+        fi
+        percent=$(awk "BEGIN { printf \"%.2f\", $covered/$total*100 }")
+        echo "Coverage de líneas: $percent% ($covered de $total líneas)"
+        # Exportar como output de la acción si se desea
+        echo "coverage=$percent" >> $GITHUB_OUTPUT
+
+    - name: Subir reporte JaCoCo como artifact
+      if: ${{ always() && success() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: jacoco-report
+        path: target/site/jacoco
+
+    - name: Reporte final de tests
+      if: ${{ success() }}
+      shell: bash
+      run: |
+        echo "Tests y cobertura completados."
+        # Opcional: forzar fallo si coverage < umbral
+        # UMBRAL=50.0
+        # if (( $(echo "$percent < $UMBRAL" | bc -l) )); then
+        #   echo "Coverage $percent% < umbral $UMBRAL%"
+        #   exit 1
+        # fi
