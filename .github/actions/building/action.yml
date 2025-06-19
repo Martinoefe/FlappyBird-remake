@@ -1,5 +1,5 @@
 name: 'Building Action Simple'
-description: 'Compila con javac y ejecuta GameController directamente, listando workspace para diagnosticar rutas de imágenes.'
+description: 'Compila con javac y ejecuta GameController directamente, asegurando disponibilidad de imágenes.'
 
 inputs:
   distribution:
@@ -41,6 +41,16 @@ runs:
         fi
         javac -d bin $files
 
+    - name: Copiar imágenes a bin
+      shell: bash
+      run: |
+        if [ -d src/images ]; then
+          cp -r src/images bin/
+        else
+          echo "No se encontró src/images. Verifica la estructura del proyecto."
+          exit 1
+        fi
+
     - name: Listar workspace para diagnóstico
       shell: bash
       run: |
@@ -52,7 +62,6 @@ runs:
       shell: bash
       run: |
         echo "Ejecutando GameController..."
-        # Ajusta para aceptar el argumento --ci si tu código lo soporta
         if command -v xvfb-run >/dev/null; then
           xvfb-run java -cp bin flappybird.GameController ${{ inputs.ci-arg }}
         else
