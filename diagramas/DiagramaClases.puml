@@ -153,13 +153,13 @@ class GamePanel {
 PowerUp <|.. GoldenBall
 PowerUp <|.. MiniMessi
 
-GameModel o-- Bird
-GameModel o-- Pipe
-GameModel o-- PowerUp
-GameModel o-- Defender
+GameModel --o Bird
+GameModel --o Pipe
+GameModel --o PowerUp
+GameModel --o Defender
 
-GameController o-- GameModel
-GameController o-- GamePanel
+GameController --o GameModel
+GameController --o GamePanel
 
 GamePanel --|> JPanel
 GamePanel --> GameModel
