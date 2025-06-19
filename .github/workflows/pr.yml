@@ -26,19 +26,17 @@ jobs:
         uses: ./.github/actions/style
 
   build:
-    name: Build & Run GameController
+    name: Build & Run GameController 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
+  
       - name: Run Building Action
         uses: ./.github/actions/building
         with:
           distribution: 'temurin'
           java-version: '11'
-          # Comando Maven que compile y ejecute la clase principal.
-          build-command: 'compile exec:java -Dexec.mainClass="flappybird.GameController"'
 
   tests:
     name: Run Tests & Coverage
