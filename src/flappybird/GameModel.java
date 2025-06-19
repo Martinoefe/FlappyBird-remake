@@ -6,31 +6,35 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Modelo global del juego. Aquí vive toda la lógica de negocio:
- * - Estado de Bird, pipes, power-ups y defensores
- * - Generación de nuevos objetos
- * - Detección de colisiones y “game over”
- * - Puntuación y scroll
+ * @class GameModel
+ * @brief Almacena y actualiza todo el estado y reglas del juego.
+ *
+ * - Maneja Bird, Pipe, PowerUp y Defender.
+ * - Genera nuevos objetos según cronogramas.
+ * - Detecta colisiones y “game over”.
+ * - Cuenta el puntaje y el scroll.
  */
 public class GameModel {
-    public static final int FPS = 80;
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
+    public static final int FPS    = 80;   ///< fotogramas por segundo
+    public static final int WIDTH  = 800;  ///< ancho de ventana
+    public static final int HEIGHT = 600;  ///< alto de ventana
 
-    // Estado global
-    private Bird bird;
-    private List<Pipe> pipes;
-    private List<PowerUp> powerUps;  // incluye GoldenBall y MiniMessi
-    private List<Defender> defenders;
+    private Bird bird;                   ///< jugador
+    private List<Pipe> pipes;            ///< tuberías
+    private List<PowerUp> powerUps;      ///< power‑ups activos
+    private List<Defender> defenders;    ///< defensores activos
 
-    private int score;
-    private int scroll;
-    private boolean paused;
+    private int score;       ///< puntuación acumulada
+    private int scroll;      ///< desplazamiento horizontal acumulado
+    private boolean paused;  ///< true si el juego está en pausa
 
-    // Control de tiempos para spawn
-    private long lastDefenderSpawnTime;
-    private long lastMiniSpawnTime;
+    private long lastDefenderSpawnTime; ///< instante del último defensor
+    private long lastMiniSpawnTime;     ///< instante del último MiniMessi
 
+    /**
+     * @brief Constructor.
+     * Inicializa listas, contador de puntaje, pausa y temporizadores de spawn.
+     */
     public GameModel() {
         bird = new Bird();
         pipes = new ArrayList<>();
@@ -40,43 +44,37 @@ public class GameModel {
         scroll = 0;
         paused = true;
         lastDefenderSpawnTime = System.currentTimeMillis();
-        lastMiniSpawnTime = System.currentTimeMillis();
+        lastMiniSpawnTime     = System.currentTimeMillis();
     }
 
-    public Bird getBird() {
-        return bird;
-    }
+    /** @return instancia de Bird (jugador). */
+    public Bird getBird() { return bird; }
 
-    public List<Pipe> getPipes() {
-        return pipes;
-    }
+    /** @return lista de tuberías activas. */
+    public List<Pipe> getPipes() { return pipes; }
 
-    public List<PowerUp> getPowerUps() {
-        return powerUps;
-    }
+    /** @return lista de power‑ups activos. */
+    public List<PowerUp> getPowerUps() { return powerUps; }
 
-    public List<Defender> getDefenders() {
-        return defenders;
-    }
+    /** @return lista de defensores activos. */
+    public List<Defender> getDefenders() { return defenders; }
 
-    public int getScore() {
-        return score;
-    }
+    /** @return puntuación actual. */
+    public int getScore() { return score; }
 
-    public boolean isPaused() {
-        return paused;
-    }
+    /** @return true si el juego está en pausa. */
+    public boolean isPaused() { return paused; }
 
-    public void setPaused(boolean p) {
-        paused = p;
-    }
+    /**
+     * @brief Cambia el estado de pausa.
+     * @param p true para pausar, false para reanudar
+     */
+    public void setPaused(boolean p) { paused = p; }
 
-    /** Hace que el pájaro salte (llamado desde el controlador) */
-    public void birdJump() {
-        bird.jump();
-    }
+    /** @brief Hace saltar al pájaro. */
+    public void birdJump() { bird.jump(); }
 
-    /** Reinicia todo el estado del juego */
+    /** @brief Resetea todo el estado del juego. */
     public void resetGame() {
         bird.reset();
         pipes.clear();
@@ -86,37 +84,33 @@ public class GameModel {
         scroll = 0;
         paused = true;
         lastDefenderSpawnTime = System.currentTimeMillis();
-        lastMiniSpawnTime = System.currentTimeMillis();
+        lastMiniSpawnTime     = System.currentTimeMillis();
     }
 
     /**
-     * Se invoca en cada *tick* del bucle principal (cada 1000/FPS ms). Actualiza TODO el juego:
-     * 1) Actualiza el estado del pájaro.
-     * 2) Genera y mueve pipes; verifica colisión pájaro ↔ pipe.
-     * 3) Genera y mueve GoldenBall; verifica colisión pájaro ↔ GoldenBall.
-     * 4) Genera y mueve Defender; verifica colisión pájaro ↔ Defender.
-     * 5) Genera y mueve MiniMessi; verifica colisión pájaro ↔ MiniMessi.
-     * 6) Verifica si el pájaro se cayó fuera de los límites.
-     * Si alguna colisión provoca “game over”, marca paused = true y retorna.
+     * @brief Actualiza un fotograma completo de juego.
+     * - Llama a todos los pasos de generación, movimiento y colisión.
      */
     public void updateGameFrame() {
         bird.updateState();
-        updateScoreAndScroll();              // Actualiza el puntaje y el scroll del juego
-        generatePipes();                     // Genera nuevas tuberías cada cierto tiempo
-        updatePipesAndCheckCollision();      // Mueve tuberías y detecta colisiones con el pájaro
-        generateGoldenBall();                // Genera una GoldenBall si corresponde
-        generateDefender();                  // Genera un nuevo defensor si han pasado 8 segundos
-        updateDefendersAndCheckCollision();  // Mueve defensores y verifica colisiones
-        generateMiniMessi();                 // Genera un MiniMessi si han pasado 10 segundos
-        updatePowerUps();                    // Actualiza power-ups y aplica efectos si colisionan
-        checkBirdOutOfBounds();              // Verifica si el pájaro se sale de la pantalla
+        updateScoreAndScroll();
+        generatePipes();
+        updatePipesAndCheckCollision();
+        generateGoldenBall();
+        generateDefender();
+        updateDefendersAndCheckCollision();
+        generateMiniMessi();
+        updatePowerUps();
+        checkBirdOutOfBounds();
     }
 
+    /** Incrementa score y scroll. */
     private void updateScoreAndScroll() {
         score++;
         scroll++;
     }
 
+    /** Genera tuberías cada 90 unidades de scroll. */
     private void generatePipes() {
         if (scroll % 90 == 0) {
             int h1 = (int)((Math.random() * HEIGHT) / 5f + 0.2f * HEIGHT);
@@ -126,102 +120,90 @@ public class GameModel {
         }
     }
 
+    /** Mueve tuberías, detecta colisiones y remueve las que salen de pantalla. */
     private void updatePipesAndCheckCollision() {
-        Iterator<Pipe> itPipe = pipes.iterator();
-        while (itPipe.hasNext()) {
-            Pipe p = itPipe.next();
+        Iterator<Pipe> it = pipes.iterator();
+        while (it.hasNext()) {
+            Pipe p = it.next();
             p.updateState();
             if (p.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
                 paused = true;
                 return;
             }
-            if (p.isOffScreen()) {
-                itPipe.remove();
-            }
+            if (p.isOffScreen()) it.remove();
         }
     }
 
+    /** Genera una GoldenBall según scroll y evita solapamiento. */
     private void generateGoldenBall() {
         if (scroll % 700 != 0) return;
-
-        int yPowerUp;
+        int yPU, attempts=0;
         boolean valid;
-        int attempts = 0;
-
         do {
-            yPowerUp = (int)(Math.random() * (HEIGHT - 100));
-            valid = true;
-            Rectangle ballBounds = new Rectangle(WIDTH, yPowerUp, 40, 40);
-            for (Pipe pipe : pipes) {
-                if (pipe.getBounds().intersects(ballBounds)) {
-                    valid = false;
-                    break;
-                }
-            }
+            yPU = (int)(Math.random() * (HEIGHT - 100));
+            int finalYPU = yPU;
+            valid = pipes.stream()
+                    .noneMatch(pipe -> pipe.getBounds().intersects(
+                            new Rectangle(WIDTH, finalYPU, 40,40)));
             attempts++;
-        } while (!valid && attempts < 10);
-
-        powerUps.add(GoldenBall.getInstancia(WIDTH, yPowerUp));
+        } while (!valid && attempts<10);
+        powerUps.add(GoldenBall.getInstancia(WIDTH, yPU));
     }
 
+    /** Genera un defensor cada 8s si no hay solapamiento. */
     private void generateDefender() {
         long now = System.currentTimeMillis();
         if (now - lastDefenderSpawnTime < 8000) return;
-
-        int defenderX = WIDTH + 100;
-        for (Pipe pipe : pipes) {
-            if (Math.abs(pipe.getX() - defenderX) < 100) {
-                return; // Evita superposición
-            }
+        int x0 = WIDTH + 100;
+        boolean overlaps = pipes.stream()
+                .anyMatch(pipe -> Math.abs(pipe.getX() - x0) < 100);
+        if (!overlaps) {
+            defenders.add(new Defender(x0));
+            lastDefenderSpawnTime = now;
         }
-
-        defenders.add(new Defender(defenderX));
-        lastDefenderSpawnTime = now;
     }
 
+    /** Mueve defensores, detecta colisión y remueve los off-screen. */
     private void updateDefendersAndCheckCollision() {
-        Iterator<Defender> itDef = defenders.iterator();
-        while (itDef.hasNext()) {
-            Defender d = itDef.next();
+        Iterator<Defender> it = defenders.iterator();
+        while (it.hasNext()) {
+            Defender d = it.next();
             d.updateState();
             if (d.getBounds().intersects(bird.getBounds()) && !bird.isInvincible()) {
                 paused = true;
                 return;
             }
-            if (d.isOffScreen()) {
-                itDef.remove();
-            }
+            if (d.isOffScreen()) it.remove();
         }
     }
 
+    /** Genera un MiniMessi cada 10s. */
     private void generateMiniMessi() {
         long now = System.currentTimeMillis();
         if (now - lastMiniSpawnTime < 10000) return;
-
-        int spawnX = WIDTH + 50;
-        int spawnY = (int)(Math.random() * (HEIGHT - 50));
-        powerUps.add(MiniMessi.getInstancia(spawnX, spawnY));
+        powerUps.add(MiniMessi.getInstancia(WIDTH+50,
+                (int)(Math.random()*(HEIGHT-50))));
         lastMiniSpawnTime = now;
     }
 
+    /** Actualiza power‑ups, aplica efecto al colisionar y remueve off-screen. */
     private void updatePowerUps() {
-        Iterator<PowerUp> itPU = powerUps.iterator();
-        while (itPU.hasNext()) {
-            PowerUp pu = itPU.next();
+        Iterator<PowerUp> it = powerUps.iterator();
+        while (it.hasNext()) {
+            PowerUp pu = it.next();
             pu.update();
             if (pu.getBounds().intersects(bird.getBounds())) {
                 pu.applyEffect(bird);
-                itPU.remove();
+                it.remove();
                 continue;
             }
-            if (pu.isOffScreen()) {
-                itPU.remove();
-            }
+            if (pu.isOffScreen()) it.remove();
         }
     }
 
+    /** Finaliza juego si el pájaro sale de la pantalla. */
     private void checkBirdOutOfBounds() {
-        if (bird.getY() > HEIGHT || bird.getY() + Bird.HEIGHT / 2f < 0) {
+        if (bird.getY()>HEIGHT || bird.getY()+Bird.HEIGHT/2f<0) {
             paused = true;
         }
     }

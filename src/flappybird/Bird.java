@@ -7,19 +7,30 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+/**
+ * @class Bird
+ * @brief Controla la lógica y dibujo del jugador (el pájaro).
+ *
+ * Gestiona posición, física (gravedad y salto), modos de invencibilidad y "mini",
+ * y su representación gráfica.
+ */
 public class Bird {
-    private float x, y, vx, vy;
-    public static final int WIDTH = 50;
-    public static final int HEIGHT = 50;
+    float x, y, vx, vy;              ///< posición y velocidad en X/Y
+    public static final int WIDTH = 50;  ///< ancho de la imagen
+    public static final int HEIGHT = 50; ///< alto de la imagen
 
-    private Image img;
-    private boolean invincible = false;
-    private int invincibleTimer = 0;
+    private Image img;                ///< imagen cargada del pájaro
+    private boolean invincible = false;///< estado de invencibilidad
+    private int invincibleTimer = 0;  ///< frames restantes de invencibilidad
 
-    private boolean mini = false;
-    private int miniTimer = 0;
-    private static final float MINI_SCALE = 0.5f;
+    private boolean mini = false;     ///< estado de modo mini
+    private int miniTimer = 0;        ///< frames restantes en modo mini
+    private static final float MINI_SCALE = 0.5f; ///< factor de escala en modo mini
 
+    /**
+     * @brief Constructor por defecto.
+     * Coloca al pájaro en el centro de la pantalla y carga su imagen.
+     */
     public Bird() {
         x = GameModel.WIDTH / 2f;
         y = GameModel.HEIGHT / 2f;
@@ -30,76 +41,106 @@ public class Bird {
         }
     }
 
+    /**
+     * @brief Actualiza física y temporizadores.
+     * - Aplica velocidad y gravedad.
+     * - Decrementa los contadores de invencibilidad y mini.
+     */
     public void updateState() {
         x += vx;
         y += vy;
         vy += 0.5f;
         if (invincible) {
-            invincibleTimer--;
-            if (invincibleTimer <= 0) invincible = false;
+            if (--invincibleTimer <= 0) invincible = false;
         }
         if (mini) {
-            miniTimer--;
-            if (miniTimer <= 0) mini = false;
+            if (--miniTimer <= 0) mini = false;
         }
     }
 
+    /**
+     * @brief Dibuja el pájaro en pantalla.
+     * Si está en modo mini escala la imagen, si está invencible dibuja un óvalo amarillo.
+     * @param g contexto gráfico donde dibujar
+     */
     public void draw(Graphics g) {
-        int drawW = WIDTH;
-        int drawH = HEIGHT;
-        if (mini) {
-            drawW = Math.round(WIDTH * MINI_SCALE);
-            drawH = Math.round(HEIGHT * MINI_SCALE);
-        }
-        g.drawImage(img, Math.round(x - drawW / 2), Math.round(y - drawH / 2), drawW, drawH, null);
+        int drawW = mini ? Math.round(WIDTH * MINI_SCALE) : WIDTH;
+        int drawH = mini ? Math.round(HEIGHT * MINI_SCALE) : HEIGHT;
+        g.drawImage(img,
+                Math.round(x - drawW/2),
+                Math.round(y - drawH/2),
+                drawW, drawH,
+                null);
         if (invincible) {
             g.setColor(Color.YELLOW);
-            g.drawOval(Math.round(x - drawW / 2 - 5), Math.round(y - drawH / 2 - 5), drawW + 10, drawH + 10);
+            g.drawOval(Math.round(x - drawW/2 - 5),
+                    Math.round(y - drawH/2 - 5),
+                    drawW + 10, drawH + 10);
         }
     }
 
+    /**
+     * @brief Provoca un salto instantáneo negativo en la velocidad vertical.
+     */
     public void jump() {
         vy = -8;
     }
 
+    /**
+     * @brief Activa invencibilidad durante un número de frames.
+     * @param durationFrames duración en frames de la invencibilidad
+     */
     public void makeInvincible(int durationFrames) {
         invincible = true;
         invincibleTimer = durationFrames;
     }
 
+    /**
+     * @brief Activa el modo mini durante un número de frames.
+     * @param durationFrames duración en frames del modo mini
+     */
     public void makeMini(int durationFrames) {
         mini = true;
         miniTimer = durationFrames;
     }
 
-    public boolean isInvincible() {
-        return invincible;
-    }
+    /** @return true si está en modo invencible */
+    public boolean isInvincible() { return invincible; }
 
-    public boolean isMini() {
-        return mini;
-    }
+    /** @return true si está en modo mini */
+    public boolean isMini()       { return mini; }
 
+    /**
+     * @brief Obtiene el rectángulo de colisión.
+     * El tamaño varía si está en modo mini.
+     * @return Rectangle con la hitbox actual
+     */
     public Rectangle getBounds() {
-        int hitboxW = 25, hitboxH = 35;
+        int w = 25, h = 35;
         if (mini) {
-            int w = Math.round(hitboxW * MINI_SCALE);
-            int h = Math.round(hitboxH * MINI_SCALE);
-            return new Rectangle(Math.round(x - w / 2), Math.round(y - h / 2), w, h);
-        } else {
-            return new Rectangle(Math.round(x - hitboxW / 2), Math.round(y - hitboxH / 2), hitboxW, hitboxH);
+            w = Math.round(w * MINI_SCALE);
+            h = Math.round(h * MINI_SCALE);
         }
+        return new Rectangle(
+                Math.round(x - w/2),
+                Math.round(y - h/2),
+                w, h
+        );
     }
 
-    public float getY() {
-        return y;
-    }
+    /**
+     * @brief Devuelve la coordenada y actual.
+     * @return posición vertical del pájaro
+     */
+    public float getY() { return y; }
 
+    /**
+     * @brief Reinicia al pájaro a la posición y estado inicial.
+     */
     public void reset() {
         x = GameModel.WIDTH / 2f;
         y = GameModel.HEIGHT / 2f;
         vx = vy = 0;
-        invincible = false;
-        mini = false;
+        invincible = mini = false;
     }
 }
