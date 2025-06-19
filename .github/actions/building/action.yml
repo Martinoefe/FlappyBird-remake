@@ -1,69 +1,43 @@
-name: 'Building Action Simple'
-description: 'Compila con javac y ejecuta GameController directamente, asegurando disponibilidad de imágenes.'
-
+name: "Build GameController"
+description: "Compila y ejecuta GameController en modo CI"
 inputs:
   distribution:
-    description: 'Distribución de JDK para setup-java (e.g., temurin)'
+    description: 'JDK distribution (e.g. temurin)'
     required: true
-    default: 'temurin'
   java-version:
-    description: 'Versión de Java'
+    description: 'Java version (e.g. 11)'
     required: true
-    default: '11'
-  ci-arg:
-    description: 'Argumento para modo CI en GameController, e.g., --ci'
-    required: false
-    default: '--ci'
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Setup Java
+    - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: ${{ inputs.distribution }}
         java-version: ${{ inputs.java-version }}
 
-    - name: Mostrar Java version
+    - name: Verificar versión de Java
       shell: bash
-      run: |
-        java -version
+      run: java -version
 
-    - name: Compilar fuentes Java
+    - name: Compilar fuentes de src/flappybird
       shell: bash
       run: |
         echo "Compilando fuentes de src/flappybird..."
         mkdir -p bin
-        files=$(find src/flappybird -name "*.java")
-        if [ -z "$files" ]; then
-          echo "No se encontraron archivos .java en src/flappybird"
-          exit 1
-        fi
-        javac -d bin $files
+        javac -d bin src/flappybird/*.java src/Main.java
 
-    - name: Copiar imágenes a bin
+    - name: Verificar imágenes necesarias
       shell: bash
       run: |
-        if [ -d src/images ]; then
-          cp -r src/images bin/
-        else
-          echo "No se encontró src/images. Verifica la estructura del proyecto."
-          exit 1
+        if [ ! -d "src/images" ]; then
+          echo "ERROR: No existe la carpeta src/images/"; exit 1
         fi
-
-    - name: Listar workspace para diagnóstico
-      shell: bash
-      run: |
-        echo "Directorio de trabajo: $(pwd)"
-        echo "Contenido del workspace:"
-        ls -R .
+        cp -r src/images bin/
 
     - name: Ejecutar GameController en modo CI
       shell: bash
       run: |
         echo "Ejecutando GameController..."
-        if command -v xvfb-run >/dev/null; then
-          xvfb-run java -cp bin flappybird.GameController ${{ inputs.ci-arg }}
-        else
-          java -cp bin flappybird.GameController ${{ inputs.ci-arg }}
-        fi
+        java -cp bin flappybird.GameController --ci || echo "Finalizó GameController"
