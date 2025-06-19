@@ -5,14 +5,11 @@ import java.awt.Rectangle;
 
 /**
  * @interface PowerUp
- * @brief Interfaz para todos los objetos recuperables que otorgan efectos al Bird.
- *
- * Define métodos para la actualización, dibujo, aplicación de efecto,
- * obtención de colisión y verificación de salida de pantalla.
+ * @brief Interfaz para efectos que aplican al pájaro.
  */
 public interface PowerUp {
     /**
-     * @brief Actualiza posición o estado interno del power‑up.
+     * @brief Actualiza la posición y lógica interna.
      */
     void update();
 
@@ -23,20 +20,20 @@ public interface PowerUp {
     void draw(Graphics g);
 
     /**
-     * @brief Aplica el efecto concreto sobre el Bird.
-     * @param bird instancia de Bird que recibe el efecto
+     * @brief Aplica el efecto al pájaro.
+     * @param bird instancia del pájaro
      */
     void applyEffect(Bird bird);
 
     /**
-     * @brief Área de colisión para detección de recogida.
-     * @return Rectangle con la hitbox actual
+     * @brief Obtiene su área de colisión.
+     * @return rectángulo de colisión
      */
     Rectangle getBounds();
 
     /**
-     * @brief Indica si ya salió de la pantalla para descartarlo.
-     * @return true si está completamente fuera de la ventana
+     * @brief Indica si ya salió de pantalla.
+     * @return true si está off‑screen
      */
     boolean isOffScreen();
 }

@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="24aae8ca-0417-4bc4-b094-ef2bd79e5a08" name="Changes" comment="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
-      <change beforePath="$PROJECT_DIR$/src/flappybird/Bird.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/Bird.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/flappybird/Defender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/Defender.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/flappybird/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/GameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/flappybird/PowerUp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/flappybird/PowerUp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,7 +208,7 @@
       <workItem from="1749581336248" duration="1196000" />
       <workItem from="1749677036950" duration="3124000" />
       <workItem from="1750273851064" duration="6592000" />
-      <workItem from="1750338215790" duration="1702000" />
+      <workItem from="1750338215790" duration="2893000" />
     </task>
     <task id="LOCAL-00001" summary="Se completo la clase GoldenBall y se hicieron test unitarios sobre esto">
       <option name="closed" value="true" />
