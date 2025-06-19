@@ -1,0 +1,22 @@
+name: Style
+description: Check C++/Java style with clang-format.
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure .clang-format exists
+      run: |
+        if [ ! -f .clang-format ]; then
+          cat > .clang-format <<EOF
+          BasedOnStyle: Google
+          IndentWidth: 4
+          EOF
+        fi
+
+    - name: Install clang-format
+      run: sudo apt-get update && sudo apt-get install -y clang-format
+
+    - name: Check Java format (via clang-format)
+      run: find src -name '*.java' -print0 | xargs -0 clang-format --dry-run --Werror
+
+    - name: Check C++ format (if any)
+      run: find src -name '*.cpp' -o -name '*.h' -print0 | xargs -0 clang-format --dry-run --Werror
