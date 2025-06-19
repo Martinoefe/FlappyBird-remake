@@ -11,14 +11,13 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install -y doxygen graphviz
+      shell: bash
 
     - name: Ejecutar Doxygen en modo chequeo
-      shell: bash
       run: |
         DOXFILE="$GITHUB_WORKSPACE/Doxyfile"
         ERRFILE="$GITHUB_WORKSPACE/dox_errors.txt"
 
-        # Ejecuta doxygen y captura stderr en ERRFILE
         doxygen "$DOXFILE" 2> "$ERRFILE" 1>/dev/null
 
         if [ -s "$ERRFILE" ]; then
@@ -28,6 +27,7 @@ runs:
         else
           echo "✅ Toda la documentación cumple con Doxyfile."
         fi
+      shell: bash
 
     - name: Subir errores (si los hay)
       if: failure()
