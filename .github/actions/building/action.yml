@@ -1,0 +1,43 @@
+name: "Build GameController"
+description: "Compila y ejecuta GameController en modo CI"
+inputs:
+  distribution:
+    description: 'JDK distribution (e.g. temurin)'
+    required: true
+  java-version:
+    description: 'Java version (e.g. 11)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+
+    - name: Verificar versión de Java
+      shell: bash
+      run: java -version
+
+    - name: Compilar fuentes de src/flappybird
+      shell: bash
+      run: |
+        echo "Compilando fuentes de src/flappybird..."
+        mkdir -p bin
+        javac -d bin src/flappybird/*.java src/Main.java
+
+    - name: Verificar imágenes necesarias
+      shell: bash
+      run: |
+        if [ ! -d "src/images" ]; then
+          echo "ERROR: No existe la carpeta src/images/"; exit 1
+        fi
+        cp -r src/images bin/
+
+    - name: Ejecutar GameController en modo CI
+      shell: bash
+      run: |
+        echo "Ejecutando GameController..."
+        java -cp bin flappybird.GameController --ci || echo "Finalizó GameController"

@@ -1,0 +1,33 @@
+name: "Test Action Simple"
+description: "Compila y ejecuta tests Java sin Maven usando JUnit 5"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Instalar Java 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Descargar JUnit
+      shell: bash
+      run: |
+        mkdir -p libs
+        curl -L -o libs/junit-platform-console-standalone.jar \
+          https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.9.3/junit-platform-console-standalone-1.9.3.jar
+
+    - name: Compilar código
+      shell: bash
+      run: |
+        mkdir -p out
+        find src -name "*.java" > sources.txt
+        find tests -name "*.java" > tests.txt
+        javac -d out @sources.txt @tests.txt -cp libs/junit-platform-console-standalone.jar
+
+    - name: Ejecutar tests
+      shell: bash
+      run: |
+        java -jar libs/junit-platform-console-standalone.jar \
+          --classpath out \
+          --scan-classpath

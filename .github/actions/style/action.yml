@@ -1,0 +1,41 @@
+name: "Style check"
+description: "Verifica estilo Java con clang-format"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instalar clang-format
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+
+    - name: Comprobar formato en src/flappybird
+      shell: bash
+      run: |
+        ERRFILE="$GITHUB_WORKSPACE/clang-format-errors.txt"
+        # Lista todos los .java de src/flappybird y tests/flappybird
+        find "$GITHUB_WORKSPACE/src/flappybird" "$GITHUB_WORKSPACE/tests/flappybird" \
+          -name '*.java' > files.list
+
+        # Ejecuta clang-format en modo chequeo (-n, --Werror)
+        xargs clang-format -n --Werror < files.list 2> "$ERRFILE"
+
+        if [ -s "$ERRFILE" ]; then
+          echo "❌ Archivos Java no formateados según .clang-format:"
+          cat "$ERRFILE"
+          exit 1
+        else
+          echo "✅ Todos los archivos Java cumplen con .clang-format."
+        fi
+
+    - name: Subir errores (si los hay)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-format-errors
+        path: clang-format-errors.txt
+        retention-days: 1

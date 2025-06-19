@@ -1,0 +1,173 @@
+@startuml
+package flappybird {
+
+interface PowerUp {
+    + update()
+    + draw(Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
+
+class Bird {
+    - x: float
+    - y: float
+    - vx: float
+    - vy: float
+    + WIDTH: int
+    + HEIGHT: int
+    - img: Image
+    - invincible: boolean
+    - invincibleTimer: int
+    - mini: boolean
+    - miniTimer: int
+    + Bird()
+    + updateState()
+    + draw(g: Graphics)
+    + jump()
+    + makeInvincible(durationFrames: int)
+    + makeMini(durationFrames: int)
+    + isInvincible(): boolean
+    + isMini(): boolean
+    + getBounds(): Rectangle
+    + getY(): float
+    + reset()
+}
+
+class Defender {
+    - x: float
+    - y: float
+    - speedY: int
+    - direction: int
+    - img: Image
+    + Defender(startX: int)
+    + updateState()
+    + draw(g: Graphics)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+    + adjustRandomSpeed()
+}
+
+class GoldenBall {
+    - x: int
+    - y: int
+    - size: int
+    - active: boolean
+    - activationTime: long
+    - img: Image
+    + getInstancia(newX: int, newY: int): GoldenBall
+    + update()
+    + draw(g: Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
+
+class MiniMessi {
+    - x: int
+    - y: int
+    - size: int
+    - img: Image
+    + getInstancia(newX: int, newY: int): MiniMessi
+    + update()
+    + draw(g: Graphics)
+    + applyEffect(bird: Bird)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
+
+class Pipe {
+    - x: float
+    - width: int
+    - height: int
+    - top: boolean
+    - headImg: Image
+    - bodyImg: Image
+    + Pipe(startX: int, width: int, height: int, top: boolean)
+    + updateState()
+    + draw(g: Graphics)
+    + getBounds(): Rectangle
+    + isOffScreen(): boolean
+}
+
+class GameModel {
+    + FPS: int
+    + WIDTH: int
+    + HEIGHT: int
+    - bird: Bird
+    - pipes: List<Pipe>
+    - powerUps: List<PowerUp>
+    - defenders: List<Defender>
+    - score: int
+    - scroll: int
+    - paused: boolean
+    - lastDefenderSpawnTime: long
+    - lastMiniSpawnTime: long
+    - gameOverMessage: String
+    + GameModel()
+    + birdJump()
+    + resetGame()
+    + updateGameFrame()
+    + getBird(): Bird
+    + getPipes(): List<Pipe>
+    + getPowerUps(): List<PowerUp>
+    + getDefenders(): List<Defender>
+    + getScore(): int
+    + isPaused(): boolean
+    + setPaused(p: boolean)
+    - updateScoreAndScroll()
+    - generatePipes()
+    - updatePipesAndCheckCollision()
+    - generateGoldenBall()
+    - generateDefender()
+    - updateDefendersAndCheckCollision()
+    - generateMiniMessi()
+    - updatePowerUps()
+    - checkBirdOutOfBounds()
+}
+
+class GameController {
+    - model: GameModel
+    - view: GamePanel
+    - frame: JFrame
+    - timer: Timer
+    + GameController()
+    + actionPerformed(e: ActionEvent)
+    + keyPressed(e: KeyEvent)
+    + keyReleased(e: KeyEvent)
+    + keyTyped(e: KeyEvent)
+    + main(args: String[])
+}
+
+class GamePanel {
+    - model: GameModel
+    - backgroundImg: BufferedImage
+    - scrollX: int
+    - scoreFont: Font
+    - pauseFont: Font
+    + PIPE_W: int
+    + GamePanel(model: GameModel)
+    + paintComponent(g: Graphics)
+}
+
+PowerUp <|.. GoldenBall
+PowerUp <|.. MiniMessi
+
+GameModel --o Bird
+GameModel --o Pipe
+GameModel --o PowerUp
+GameModel --o Defender
+
+GameController --o GameModel
+GameController --o GamePanel
+
+GamePanel --|> JPanel
+GamePanel --> GameModel
+
+Bird --> Rectangle
+Pipe --> Rectangle
+Defender --> Rectangle
+PowerUp --> Rectangle
+
+}
+@enduml

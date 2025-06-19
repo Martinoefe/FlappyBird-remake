@@ -1,0 +1,33 @@
+name: "Doc check"
+description: "Verifica documentación Doxygen"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Instalar Doxygen y Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+      shell: bash
+
+    - name: Ejecutar Doxygen
+      run: |
+        doxygen Doxyfile 2> dox_errors.txt 1>/dev/null
+        if [ -s dox_errors.txt ]; then
+          echo "❌ Errores de documentación detectados:"
+          cat dox_errors.txt
+          exit 1
+        else
+          echo "✅ Documentación OK"
+        fi
+      shell: bash
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: doxygen-errors
+        path: dox_errors.txt
+        retention-days: 1

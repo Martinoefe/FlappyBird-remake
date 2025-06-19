@@ -1,80 +1,90 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package flappybird;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.io.File;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 /**
+ * @class GamePanel
+ * @brief Panel Swing principal donde se dibuja todo el juego.
  *
- * @author User
+ * - Dibuja el fondo con scroll infinito.
+ * - Pinta Bird, PowerUps, Pipes y Defenders.
+ * - Muestra el puntaje y mensajes de pausa.
  */
 public class GamePanel extends JPanel {
-    
-    private Bird bird;
-    private ArrayList<Rectangle> rects;
-    private FlappyBird fb;
-    private Font scoreFont, pauseFont;
-    public static final Color bg = new Color(0, 158, 158);
-    public static final int PIPE_W = 50, PIPE_H = 30;
-    private Image pipeHead, pipeLength;
+    private GameModel        model;            ///< referencia al modelo de juego
+    private BufferedImage    backgroundImg;    ///< imagen de fondo
+    private int              scrollX      = 0; ///< desplazamiento horizontal acumulado
+    private static final int SCROLL_SPEED = 2; ///< velocidad de scroll del fondo
+    private Font             scoreFont    =    ///< fuente para puntaje
+        new Font("Comic Sans MS", Font.BOLD, 18);
+    private Font pauseFont = ///< fuente para mensaje de pausa
+        new Font("Arial", Font.BOLD, 48);
 
-    public GamePanel(FlappyBird fb, Bird bird, ArrayList<Rectangle> rects) {
-        this.fb = fb;
-        this.bird = bird;
-        this.rects = rects;
-        scoreFont = new Font("Comic Sans MS", Font.BOLD, 18);
-        pauseFont = new Font("Arial", Font.BOLD, 48);
-        
+    public static final int PIPE_W = 50; ///< ancho estándar de tubería
+
+    /**
+     * @brief Constructor.
+     * Carga la imagen de fondo y guarda la referencia al modelo.
+     * @param model instancia de GameModel
+     */
+    public GamePanel(GameModel model) {
+        this.model = model;
         try {
-        	pipeHead = ImageIO.read(new File("78px-Pipe.png"));
-        	pipeLength = ImageIO.read(new File("pipe_part.png"));
-        }
-        catch(IOException e) {
+            backgroundImg = ImageIO.read(getClass().getResourceAsStream("/images/background.png"));
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
     }
+
+    /**
+     * @brief Dibuja todos los elementos del juego.
+     * - Fondo (con scroll), Bird, PowerUps, Pipes, Defenders.
+     * - Puntaje en esquina y texto de pausa si aplica.
+     * @param g contexto gráfico
+     */
     @Override
-    public void paintComponent(Graphics g) {
-        g.setColor(bg);
-        g.fillRect(0,0,FlappyBird.WIDTH,FlappyBird.HEIGHT);
-        bird.update(g);
-        g.setColor(Color.RED);
-        for(Rectangle r : rects) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setColor(Color.GREEN);
-            //g2d.fillRect(r.x, r.y, r.width, r.height);
-            AffineTransform old = g2d.getTransform();
-            g2d.translate(r.x+PIPE_W/2, r.y+PIPE_H/2);
-            if(r.y < FlappyBird.HEIGHT/2) {
-                g2d.translate(0, r.height);
-                g2d.rotate(Math.PI);
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // scroll y dibujo de fondo
+        if ( backgroundImg != null ) {
+            int imgW = backgroundImg.getWidth();
+            scrollX -= SCROLL_SPEED;
+            if ( scrollX <= -imgW )
+                scrollX = 0;
+            for ( int x = scrollX; x < GameModel.WIDTH; x += imgW ) {
+                g.drawImage(backgroundImg, x, 0, GameModel.WIDTH, GameModel.HEIGHT, null);
             }
-            g2d.drawImage(pipeHead, -PIPE_W/2, -PIPE_H/2, GamePanel.PIPE_W, GamePanel.PIPE_H, null);
-            g2d.drawImage(pipeLength, -PIPE_W/2, PIPE_H/2, GamePanel.PIPE_W, r.height, null);
-            g2d.setTransform(old);
+        } else {
+            g.setColor(new Color(0, 158, 158));
+            g.fillRect(0, 0, GameModel.WIDTH, GameModel.HEIGHT);
         }
+
+        // dibuja entidades
+        model.getBird().draw(g);
+        for ( PowerUp pu : model.getPowerUps() )
+            pu.draw(g);
+        for ( Pipe p : model.getPipes() )
+            p.draw(g);
+        for ( Defender d : model.getDefenders() )
+            d.draw(g);
+
+        // dibuja puntaje
         g.setFont(scoreFont);
-        g.setColor(Color.BLACK);
-        g.drawString("Score: "+fb.getScore(), 10, 20);
-        
-        if(fb.paused()) {
+        g.setColor(Color.white);
+        g.drawString("Score: " + model.getScore(), 10, 20);
+
+        // dibuja mensaje de pausa si corresponde
+        if ( model.isPaused() ) {
             g.setFont(pauseFont);
-            g.setColor(new Color(0,0,0,170));
-            g.drawString("PAUSED", FlappyBird.WIDTH/2-100, FlappyBird.HEIGHT/2-100);
-            g.drawString("PRESS SPACE TO BEGIN", FlappyBird.WIDTH/2-300, FlappyBird.HEIGHT/2+50);
+            g.setColor(new Color(255, 255, 255, 200));
+            g.drawString("PAUSED", GameModel.WIDTH / 2 - 100, GameModel.HEIGHT / 2 - 100);
+            g.drawString(
+                "PRESS SPACE TO BEGIN", GameModel.WIDTH / 2 - 300, GameModel.HEIGHT / 2 + 50);
         }
     }
 }

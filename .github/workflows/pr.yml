@@ -1,0 +1,48 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    # Dispara para cualquier cambio en la PR
+    paths:
+      - '**'
+
+jobs:
+  documentation:
+    name: Documentation (Doxygen)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Run Documentation Action
+        uses: ./.github/actions/documentation
+
+  style:
+    name: Style Check (clang-format)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Run Style Action
+        uses: ./.github/actions/style
+
+  build:
+    name: Build & Run GameController 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+  
+      - name: Run Building Action
+        uses: ./.github/actions/building
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ejecutar tests
+        uses: ./.github/actions/tests
