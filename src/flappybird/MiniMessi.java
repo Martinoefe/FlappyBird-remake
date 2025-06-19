@@ -8,64 +8,77 @@ import javax.imageio.ImageIO;
 
 /**
  * @class MiniMessi
- * @brief PowerUp único (singleton) que reduce el tamaño del pájaro temporalmente.
- *
- * - Se mueve hacia la izquierda.
- * - Al colisionar, hace al pájaro “mini” durante un tiempo.
- * - Instancia única.
+ * @brief Power‑up que reduce temporalmente el tamaño del pájaro.
  */
 public class MiniMessi implements PowerUp {
-    private int x, y;               ///< posición del PowerUp
-    private final int size = 60;    ///< tamaño del sprite ampliado
-    private Image img;              ///< imagen de la bebida
+    private int x, y;            ///< Posición actual del power‑up
+    private final int size = 60; ///< Tamaño original del sprite
 
-    private static final MiniMessi instancia = new MiniMessi(); ///< singleton
+    private Image img;           ///< Imagen del power‑up
+
+    /// Instancia singleton
+    private static final MiniMessi instancia = new MiniMessi();
 
     private MiniMessi() { }
 
     /**
-     * @brief Obtiene la instancia y la reposiciona.
-     * @param newX coordenada X de spawn
-     * @param newY coordenada Y de spawn
-     * @return instancia única de MiniMessi
+     * @brief Obtiene la instancia única, reposicionándola.
+     * @param newX Nueva coordenada X
+     * @param newY Nueva coordenada Y
+     * @return la instancia singleton de MiniMessi
      */
     public static MiniMessi getInstancia(int newX, int newY) {
         instancia.x = newX;
         instancia.y = newY;
         try {
             instancia.img = ImageIO.read(
-                    MiniMessi.class.getResourceAsStream("/images/bebida.png"));
+                    MiniMessi.class.getResourceAsStream("/images/bebida.png")
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
         return instancia;
     }
 
-    /** @copydoc PowerUp#update() */
+    /**
+     * @brief Desplaza el power‑up hacia la izquierda cada frame.
+     */
     @Override
     public void update() {
         x -= 3;
     }
 
-    /** @copydoc PowerUp#draw(Graphics) */
+    /**
+     * @brief Dibuja el power‑up en la posición actual.
+     * @param g Contexto gráfico donde pintar
+     */
     @Override
     public void draw(Graphics g) {
         g.drawImage(img, x, y, size, size, null);
     }
 
-    /** @copydoc PowerUp#applyEffect(Bird) */
+    /**
+     * @brief Aplica el efecto de miniatura al pájaro.
+     * @param bird Instancia del pájaro a afectar
+     */
     @Override
     public void applyEffect(Bird bird) {
         bird.makeMini(400);
     }
 
-    /** @copydoc PowerUp#getBounds() */
+    /**
+     * @brief Devuelve el rectángulo de colisión del power‑up.
+     * @return Un Rectangle de tamaño `size` en `(x,y)`
+     */
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, size, size);
     }
 
-    /** @copydoc PowerUp#isOffScreen() */
+    /**
+     * @brief Comprueba si el power‑up ha salido de la pantalla.
+     * @return `true` si `x + size < 0`
+     */
     @Override
     public boolean isOffScreen() {
         return x + size < 0;

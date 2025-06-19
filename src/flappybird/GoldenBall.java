@@ -8,64 +8,77 @@ import javax.imageio.ImageIO;
 
 /**
  * @class GoldenBall
- * @brief PowerUp único (singleton) que otorga invencibilidad temporal.
- *
- * - Se mueve hacia la izquierda.
- * - Aplica invencibilidad al colisionar.
- * - Se instancia una única vez.
+ * @brief Power‑up que hace al pájaro invencible durante un número de frames.
  */
 public class GoldenBall implements PowerUp {
-    private int x, y;                 ///< posición del PowerUp
-    private final int size = 30;      ///< tamaño del sprite
-    private Image img;                ///< imagen del balón de oro
+    private int x, y;           ///< Posición actual de la bola dorada
+    private final int size = 30;///< Tamaño (ancho = alto) de la bola
 
-    private static final GoldenBall instancia = new GoldenBall(); ///< singleton
+    private Image img;          ///< Imagen que se dibuja
+
+    /// Instancia singleton
+    private static final GoldenBall instancia = new GoldenBall();
 
     private GoldenBall() { }
 
     /**
-     * @brief Obtiene la instancia y sitúa el PowerUp.
-     * @param newX coordenada X inicial
-     * @param newY coordenada Y inicial
-     * @return instancia única de GoldenBall
+     * @brief Obtiene la instancia única, reposicionándola.
+     * @param newX Nueva coordenada X
+     * @param newY Nueva coordenada Y
+     * @return la instancia singleton de GoldenBall
      */
     public static GoldenBall getInstancia(int newX, int newY) {
         instancia.x = newX;
         instancia.y = newY;
         try {
             instancia.img = ImageIO.read(
-                    GoldenBall.class.getResourceAsStream("/images/balon_de_oro.png"));
+                    GoldenBall.class.getResourceAsStream("/images/balon_de_oro.png")
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
         return instancia;
     }
 
-    /** @copydoc PowerUp#update() */
+    /**
+     * @brief Mueve la bola hacia la izquierda cada frame.
+     */
     @Override
     public void update() {
         x -= 3;
     }
 
-    /** @copydoc PowerUp#draw(Graphics) */
+    /**
+     * @brief Dibuja la bola dorada en pantalla.
+     * @param g Contexto gráfico donde pintar
+     */
     @Override
     public void draw(Graphics g) {
         g.drawImage(img, x, y, size, size, null);
     }
 
-    /** @copydoc PowerUp#applyEffect(Bird) */
+    /**
+     * @brief Aplica el efecto de invencibilidad al pájaro.
+     * @param bird Instancia del pájaro a afectar
+     */
     @Override
     public void applyEffect(Bird bird) {
         bird.makeInvincible(320);
     }
 
-    /** @copydoc PowerUp#getBounds() */
+    /**
+     * @brief Obtiene el rectángulo de colisión de la bola.
+     * @return Un Rectangle de tamaño `size` en `(x,y)`
+     */
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, size, size);
     }
 
-    /** @copydoc PowerUp#isOffScreen() */
+    /**
+     * @brief Indica si la bola ha salido de la pantalla por la izquierda.
+     * @return `true` si `x + size <= 0`
+     */
     @Override
     public boolean isOffScreen() {
         return x + size <= 0;
