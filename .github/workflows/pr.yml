@@ -39,16 +39,12 @@ jobs:
           java-version: '11'
 
   tests:
-    name: Run Tests & Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Run Tests Action
-        uses: ./.github/actions/tests
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-          # Comando Maven para tests (genera reporte JaCoCo)
-          test-command: 'test'
+      name: Run Tests & Coverage
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+    
+        - name: Ejecutar acción de test
+          uses: ./.github/actions/tests
+          with:
+            java-version: '17'
