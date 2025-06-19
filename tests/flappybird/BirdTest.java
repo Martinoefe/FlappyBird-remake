@@ -2,11 +2,10 @@ package flappybird;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
-
-import java.awt.Rectangle;
 
 /**
  * @class BirdTest
@@ -16,7 +15,6 @@ import java.awt.Rectangle;
  * capacidad de salto, invencibilidad, modo mini, y reinicio de estado.
  */
 public class BirdTest {
-
     private Bird bird;
 
     /**
@@ -26,7 +24,7 @@ public class BirdTest {
     public void setUp() {
         try {
             bird = new Bird();
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             bird = null;
         }
     }
@@ -41,25 +39,19 @@ public class BirdTest {
      */
     @Test
     public void testInitialPosition() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
-        float expectedCenterX = GameModel.WIDTH  / 2f + 0.5f;
+        float expectedCenterX = GameModel.WIDTH / 2f + 0.5f;
         float expectedCenterY = GameModel.HEIGHT / 2f + 0.5f;
 
         Rectangle bounds = bird.getBounds();
-        assertEquals(expectedCenterX,
-                (float)bounds.getCenterX(),
-                0.01f,
-                "El centerX del hitbox debe ser WIDTH/2 + 0.5");
-        assertEquals(expectedCenterY,
-                (float)bounds.getCenterY(),
-                0.01f,
-                "El centerY del hitbox debe ser HEIGHT/2 + 0.5");
+        assertEquals(expectedCenterX, (float) bounds.getCenterX(), 0.01f,
+            "El centerX del hitbox debe ser WIDTH/2 + 0.5");
+        assertEquals(expectedCenterY, (float) bounds.getCenterY(), 0.01f,
+            "El centerY del hitbox debe ser HEIGHT/2 + 0.5");
 
-        assertEquals(GameModel.HEIGHT / 2f,
-                bird.getY(),
-                0.01f,
-                "Y debe estar en HEIGHT/2");
+        assertEquals(GameModel.HEIGHT / 2f, bird.getY(), 0.01f, "Y debe estar en HEIGHT/2");
     }
 
     /**
@@ -67,13 +59,13 @@ public class BirdTest {
      */
     @Test
     public void testJumpChangesVerticalPosition() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
         float initialY = bird.getY();
         bird.jump();
         bird.updateState();
-        assertTrue(bird.getY() < initialY,
-                "Después de jump() y updateState(), Y debe disminuir");
+        assertTrue(bird.getY() < initialY, "Después de jump() y updateState(), Y debe disminuir");
     }
 
     /**
@@ -81,7 +73,8 @@ public class BirdTest {
      */
     @Test
     public void testInvincibilityActivationAndExpiration() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
         bird.makeInvincible(2);
         assertTrue(bird.isInvincible(), "Debe activarse la invencibilidad");
@@ -95,7 +88,8 @@ public class BirdTest {
      */
     @Test
     public void testMiniActivationAndExpiration() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
         bird.makeMini(2);
         assertTrue(bird.isMini(), "Debe activarse el modo mini");
@@ -109,17 +103,18 @@ public class BirdTest {
      */
     @Test
     public void testBoundsAreSmallerWhenMini() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
         Rectangle normal = bird.getBounds();
         bird.makeMini(10);
         bird.updateState();
         Rectangle mini = bird.getBounds();
 
-        assertTrue(mini.width  < normal.width,
-                "Cuando está mini, el ancho del hitbox debe ser menor");
-        assertTrue(mini.height < normal.height,
-                "Cuando está mini, la altura del hitbox debe ser menor");
+        assertTrue(
+            mini.width < normal.width, "Cuando está mini, el ancho del hitbox debe ser menor");
+        assertTrue(
+            mini.height < normal.height, "Cuando está mini, la altura del hitbox debe ser menor");
     }
 
     /**
@@ -127,7 +122,8 @@ public class BirdTest {
      */
     @Test
     public void testResetRestoresInitialState() {
-        if (!isInstanciado()) return;
+        if ( !isInstanciado() )
+            return;
 
         bird.jump();
         bird.makeInvincible(10);
@@ -136,20 +132,16 @@ public class BirdTest {
 
         bird.reset();
 
-        float expectedCenterX = GameModel.WIDTH  / 2f + 0.5f;
+        float expectedCenterX = GameModel.WIDTH / 2f + 0.5f;
         float expectedCenterY = GameModel.HEIGHT / 2f + 0.5f;
 
         Rectangle bounds = bird.getBounds();
-        assertEquals(expectedCenterX,
-                (float)bounds.getCenterX(),
-                0.01f,
-                "Reset debe restaurar centerX a WIDTH/2 + 0.5");
-        assertEquals(expectedCenterY,
-                (float)bounds.getCenterY(),
-                0.01f,
-                "Reset debe restaurar centerY a HEIGHT/2 + 0.5");
+        assertEquals(expectedCenterX, (float) bounds.getCenterX(), 0.01f,
+            "Reset debe restaurar centerX a WIDTH/2 + 0.5");
+        assertEquals(expectedCenterY, (float) bounds.getCenterY(), 0.01f,
+            "Reset debe restaurar centerY a HEIGHT/2 + 0.5");
 
         assertFalse(bird.isInvincible(), "Reset debe desactivar invencibilidad");
-        assertFalse(bird.isMini(),      "Reset debe desactivar modo mini");
+        assertFalse(bird.isMini(), "Reset debe desactivar modo mini");
     }
 }

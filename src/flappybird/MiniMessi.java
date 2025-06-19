@@ -11,15 +11,15 @@ import javax.imageio.ImageIO;
  * @brief Power‑up que reduce temporalmente el tamaño del pájaro.
  */
 public class MiniMessi implements PowerUp {
-    private int x, y;            ///< Posición actual del power‑up
+    private int       x, y;      ///< Posición actual del power‑up
     private final int size = 60; ///< Tamaño original del sprite
 
-    private Image img;           ///< Imagen del power‑up
+    private Image img; ///< Imagen del power‑up
 
     /// Instancia singleton
     private static final MiniMessi instancia = new MiniMessi();
 
-    private MiniMessi() { }
+    private MiniMessi() {}
 
     /**
      * @brief Obtiene la instancia única, reposicionándola.
@@ -31,10 +31,8 @@ public class MiniMessi implements PowerUp {
         instancia.x = newX;
         instancia.y = newY;
         try {
-            instancia.img = ImageIO.read(
-                    MiniMessi.class.getResourceAsStream("/images/bebida.png")
-            );
-        } catch (IOException e) {
+            instancia.img = ImageIO.read(MiniMessi.class.getResourceAsStream("/images/bebida.png"));
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
         return instancia;

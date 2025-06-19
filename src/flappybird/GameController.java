@@ -12,10 +12,10 @@ import javax.swing.*;
  * - Muestra un diálogo de “Game Over” al perder, y resetea el juego.
  */
 public class GameController implements ActionListener, KeyListener {
-    private GameModel model;   ///< Lógica de negocio del juego
-    private GamePanel view;    ///< Panel Swing donde se dibuja
-    private JFrame frame;      ///< Ventana principal
-    private Timer timer;       ///< Generador de ticks a 1000/FPS ms
+    private GameModel model; ///< Lógica de negocio del juego
+    private GamePanel view;  ///< Panel Swing donde se dibuja
+    private JFrame    frame; ///< Ventana principal
+    private Timer     timer; ///< Generador de ticks a 1000/FPS ms
 
     /**
      * @brief Constructor.
@@ -45,11 +45,10 @@ public class GameController implements ActionListener, KeyListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!model.isPaused()) {
+        if ( !model.isPaused() ) {
             model.updateGameFrame();
-            if (model.isPaused()) {
-                JOptionPane.showMessageDialog(frame,
-                        "Game Over\nYour Score: " + model.getScore());
+            if ( model.isPaused() ) {
+                JOptionPane.showMessageDialog(frame, "Game Over\nYour Score: " + model.getScore());
                 model.resetGame();
             }
         }
@@ -64,9 +63,9 @@ public class GameController implements ActionListener, KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
+        if ( e.getKeyCode() == KeyEvent.VK_UP ) {
             model.birdJump();
-        } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        } else if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
             model.setPaused(false);
         }
     }

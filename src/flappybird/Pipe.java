@@ -15,12 +15,12 @@ import javax.imageio.ImageIO;
  * - Proporciona su área de colisión y controla su expulsión de pantalla.
  */
 public class Pipe {
-    private float x;              ///< coordenada X horizontal
-    private final int width;      ///< ancho de la tubería
-    private final int height;     ///< alto de la tubería (variable)
-    private final boolean top;    ///< true si es tubería superior
-    private Image headImg;        ///< imagen de la cabeza
-    private Image bodyImg;        ///< imagen del cuerpo
+    private float         x;       ///< coordenada X horizontal
+    private final int     width;   ///< ancho de la tubería
+    private final int     height;  ///< alto de la tubería (variable)
+    private final boolean top;     ///< true si es tubería superior
+    private Image         headImg; ///< imagen de la cabeza
+    private Image         bodyImg; ///< imagen del cuerpo
 
     /**
      * @brief Constructor completo.
@@ -31,12 +31,11 @@ public class Pipe {
      * @param headImg imagen de la cabeza
      * @param bodyImg imagen del cuerpo
      */
-    public Pipe(int startX, int width, int height, boolean top,
-                Image headImg, Image bodyImg) {
-        this.x = startX;
-        this.width = width;
-        this.height = height;
-        this.top = top;
+    public Pipe(int startX, int width, int height, boolean top, Image headImg, Image bodyImg) {
+        this.x       = startX;
+        this.width   = width;
+        this.height  = height;
+        this.top     = top;
         this.headImg = headImg;
         this.bodyImg = bodyImg;
     }
@@ -51,11 +50,9 @@ public class Pipe {
     public Pipe(int startX, int width, int height, boolean top) {
         this(startX, width, height, top, null, null);
         try {
-            this.headImg = ImageIO.read(
-                    getClass().getResourceAsStream("/images/pipe.png"));
-            this.bodyImg = ImageIO.read(
-                    getClass().getResourceAsStream("/images/pipe_part.png"));
-        } catch (IOException e) {
+            this.headImg = ImageIO.read(getClass().getResourceAsStream("/images/pipe.png"));
+            this.bodyImg = ImageIO.read(getClass().getResourceAsStream("/images/pipe_part.png"));
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
     }

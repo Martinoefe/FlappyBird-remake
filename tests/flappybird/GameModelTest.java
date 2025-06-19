@@ -1,12 +1,11 @@
 package flappybird;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @class GameModelTest
@@ -16,9 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * el avance de puntaje y la generación de obstáculos.
  */
 public class GameModelTest {
-
     private GameModel model;
-    private boolean setupExitoso = false;
+    private boolean   setupExitoso = false;
 
     /**
      * @brief Inicializa una nueva instancia de GameModel antes de cada prueba.
@@ -26,19 +24,21 @@ public class GameModelTest {
     @BeforeEach
     void setUp() {
         try {
-            model = new GameModel();
+            model        = new GameModel();
             setupExitoso = model != null;
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             setupExitoso = false;
         }
     }
 
     /**
-     * @test Verifica el estado inicial del modelo: juego pausado, score cero y sin entidades en pantalla.
+     * @test Verifica el estado inicial del modelo: juego pausado, score cero y sin entidades en
+     * pantalla.
      */
     @Test
     void testInitialState() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         assertTrue(model.isPaused(), "Debe iniciar en paused=true");
         assertEquals(0, model.getScore(), "Puntaje inicial debe ser 0");
@@ -53,7 +53,8 @@ public class GameModelTest {
      */
     @Test
     void testSetPausedAndBirdJump() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         model.setPaused(false);
         assertFalse(model.isPaused(), "setPaused(false) debe despausar");
@@ -70,14 +71,16 @@ public class GameModelTest {
      */
     @Test
     void testResetGameClearsState() throws Exception {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         model.setPaused(false);
         model.birdJump();
 
         setScroll(model, 89); // Forzar estado para generar pipes en el siguiente frame
         model.updateGameFrame();
-        assertFalse(model.getPipes().isEmpty(), "Debe generarse pipes cuando scroll pasa de 89 a 90");
+        assertFalse(
+            model.getPipes().isEmpty(), "Debe generarse pipes cuando scroll pasa de 89 a 90");
 
         model.resetGame();
 
@@ -93,7 +96,8 @@ public class GameModelTest {
      */
     @Test
     void testScoreAndScrollIncrement() throws Exception {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         int initialScore = model.getScore();
         model.setPaused(false);
@@ -112,7 +116,8 @@ public class GameModelTest {
      */
     @Test
     void testGeneratePipesAtInterval() throws Exception {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         setScroll(model, 89);
         model.setPaused(false);

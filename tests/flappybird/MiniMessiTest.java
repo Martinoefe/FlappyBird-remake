@@ -1,13 +1,12 @@
 package flappybird;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @class MiniMessiTest
@@ -17,11 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * el efecto sobre el pájaro y el renderizado.
  */
 public class MiniMessiTest {
-
     private static final int INITIAL_X = 300;
     private static final int INITIAL_Y = 150;
-    private MiniMessi mini;
-    private boolean setupExitoso = false;
+    private MiniMessi        mini;
+    private boolean          setupExitoso = false;
 
     /**
      * @brief Inicializa la instancia singleton de MiniMessi antes de cada prueba.
@@ -29,9 +27,9 @@ public class MiniMessiTest {
     @BeforeEach
     void setUp() {
         try {
-            mini = MiniMessi.getInstancia(INITIAL_X, INITIAL_Y);
+            mini         = MiniMessi.getInstancia(INITIAL_X, INITIAL_Y);
             setupExitoso = mini != null;
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             setupExitoso = false;
         }
     }
@@ -41,7 +39,8 @@ public class MiniMessiTest {
      */
     @Test
     void testSingletonIdentity() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         MiniMessi other = MiniMessi.getInstancia(10, 20);
         assertSame(mini, other, "MiniMessi debe comportarse como singleton");
@@ -52,7 +51,8 @@ public class MiniMessiTest {
      */
     @Test
     void testPositionAfterGetInstancia() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         Rectangle bounds = mini.getBounds();
         assertEquals(INITIAL_X, bounds.x, "La coordenada X debe coincidir con la pasada");
@@ -64,7 +64,8 @@ public class MiniMessiTest {
      */
     @Test
     void testUpdateMovesLeftByThree() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         Rectangle before = mini.getBounds();
         mini.update();
@@ -78,10 +79,11 @@ public class MiniMessiTest {
      */
     @Test
     void testDrawDoesNotThrow() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         BufferedImage img = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = img.createGraphics();
+        Graphics2D    g2d = img.createGraphics();
         assertDoesNotThrow(() -> mini.draw(g2d), "draw() no debe lanzar excepción");
     }
 
@@ -90,12 +92,15 @@ public class MiniMessiTest {
      */
     @Test
     void testApplyEffectDoesNotThrow() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         try {
             Bird bird = new Bird();
-            assertDoesNotThrow(() -> mini.applyEffect(bird), "applyEffect() no debe lanzar excepción");
-        } catch (Exception ignored) {}
+            assertDoesNotThrow(
+                () -> mini.applyEffect(bird), "applyEffect() no debe lanzar excepción");
+        } catch ( Exception ignored ) {
+        }
     }
 
     /**
@@ -103,7 +108,8 @@ public class MiniMessiTest {
      */
     @Test
     void testGetBoundsSize() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         Rectangle bounds = mini.getBounds();
         assertEquals(60, bounds.width, "El ancho del hitbox debe ser igual a size");
@@ -111,14 +117,16 @@ public class MiniMessiTest {
     }
 
     /**
-     * @test Verifica que isOffScreen() devuelva true cuando el objeto está completamente fuera de pantalla.
+     * @test Verifica que isOffScreen() devuelva true cuando el objeto está completamente fuera de
+     * pantalla.
      */
     @Test
     void testIsOffScreenTrueWhenCompletelyLeft() {
         try {
             mini = MiniMessi.getInstancia(-61, 0);
             assertTrue(mini.isOffScreen(), "isOffScreen() debe ser true cuando x + size < 0");
-        } catch (Exception ignored) {}
+        } catch ( Exception ignored ) {
+        }
     }
 
     /**
@@ -128,7 +136,9 @@ public class MiniMessiTest {
     void testIsOffScreenFalseWhenVisible() {
         try {
             mini = MiniMessi.getInstancia(0, 0);
-            assertFalse(mini.isOffScreen(), "isOffScreen() debe ser false cuando el objeto aún es visible");
-        } catch (Exception ignored) {}
+            assertFalse(
+                mini.isOffScreen(), "isOffScreen() debe ser false cuando el objeto aún es visible");
+        } catch ( Exception ignored ) {
+        }
     }
 }

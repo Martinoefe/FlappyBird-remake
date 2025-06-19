@@ -11,15 +11,15 @@ import javax.imageio.ImageIO;
  * @brief Power‑up que hace al pájaro invencible durante un número de frames.
  */
 public class GoldenBall implements PowerUp {
-    private int x, y;           ///< Posición actual de la bola dorada
-    private final int size = 30;///< Tamaño (ancho = alto) de la bola
+    private int       x, y;      ///< Posición actual de la bola dorada
+    private final int size = 30; ///< Tamaño (ancho = alto) de la bola
 
-    private Image img;          ///< Imagen que se dibuja
+    private Image img; ///< Imagen que se dibuja
 
     /// Instancia singleton
     private static final GoldenBall instancia = new GoldenBall();
 
-    private GoldenBall() { }
+    private GoldenBall() {}
 
     /**
      * @brief Obtiene la instancia única, reposicionándola.
@@ -31,10 +31,9 @@ public class GoldenBall implements PowerUp {
         instancia.x = newX;
         instancia.y = newY;
         try {
-            instancia.img = ImageIO.read(
-                    GoldenBall.class.getResourceAsStream("/images/balon_de_oro.png")
-            );
-        } catch (IOException e) {
+            instancia.img =
+                ImageIO.read(GoldenBall.class.getResourceAsStream("/images/balon_de_oro.png"));
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
         return instancia;

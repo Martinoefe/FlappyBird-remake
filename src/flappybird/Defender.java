@@ -13,16 +13,16 @@ import javax.imageio.ImageIO;
  * Se desplaza hacia la izquierda y rebota entre límites superior e inferior.
  */
 public class Defender {
-    private float x, y;               ///< posición en pantalla
-    private int speedY;               ///< velocidad vertical
-    private int direction = 1;        ///< 1 = va hacia abajo, -1 = hacia arriba
-    private Image img;                ///< imagen del defensor
+    private float x, y;          ///< posición en pantalla
+    private int   speedY;        ///< velocidad vertical
+    private int   direction = 1; ///< 1 = va hacia abajo, -1 = hacia arriba
+    private Image img;           ///< imagen del defensor
 
-    private static final int WIDTH = 50;                    ///< ancho del sprite
-    private static final int HEIGHT = 50;                   ///< alto del sprite
-    private static final int LIMIT_TOP = 10;                ///< límite superior en Y
-    private static final int LIMIT_BOTTOM =                    ///< límite inferior en Y
-            GameModel.HEIGHT - HEIGHT;
+    private static final int WIDTH        = 50; ///< ancho del sprite
+    private static final int HEIGHT       = 50; ///< alto del sprite
+    private static final int LIMIT_TOP    = 10; ///< límite superior en Y
+    private static final int LIMIT_BOTTOM =     ///< límite inferior en Y
+        GameModel.HEIGHT - HEIGHT;
 
     /**
      * @brief Constructor.
@@ -30,13 +30,13 @@ public class Defender {
      */
     public Defender(int startX) {
         this.x = startX;
-        this.y = (float)(Math.random() * (GameModel.HEIGHT - HEIGHT));
+        this.y = (float) (Math.random() * (GameModel.HEIGHT - HEIGHT));
         try {
             img = ImageIO.read(getClass().getResourceAsStream("/images/defender.png"));
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
-        this.speedY = 4 + (int)(Math.random() * 4);
+        this.speedY = 4 + (int) (Math.random() * 4);
     }
 
     /**
@@ -46,12 +46,12 @@ public class Defender {
      */
     public void updateState() {
         y += direction * speedY;
-        if (y <= LIMIT_TOP) {
-            y = LIMIT_TOP;
+        if ( y <= LIMIT_TOP ) {
+            y         = LIMIT_TOP;
             direction = 1;
             ajustarVelocidadAleatoria();
-        } else if (y >= LIMIT_BOTTOM) {
-            y = LIMIT_BOTTOM;
+        } else if ( y >= LIMIT_BOTTOM ) {
+            y         = LIMIT_BOTTOM;
             direction = -1;
             ajustarVelocidadAleatoria();
         }
@@ -71,19 +71,15 @@ public class Defender {
      * @return Rectangle con hitbox (ligeramente más estrecha)
      */
     public Rectangle getBounds() {
-        return new Rectangle(
-                Math.round(x + 5),
-                Math.round(y),
-                40, 50
-        );
+        return new Rectangle(Math.round(x + 5), Math.round(y), 40, 50);
     }
 
     /**
      * @brief Cambia aleatoriamente la velocidad vertical (20% de probabilidad).
      */
     private void ajustarVelocidadAleatoria() {
-        if (Math.random() < 0.2) {
-            speedY = 4 + (int)(Math.random() * 4);
+        if ( Math.random() < 0.2 ) {
+            speedY = 4 + (int) (Math.random() * 4);
         }
     }
 

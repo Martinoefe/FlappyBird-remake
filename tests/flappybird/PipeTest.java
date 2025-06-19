@@ -1,13 +1,12 @@
 package flappybird;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @class PipeTest
@@ -17,15 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * límites de colisión, visibilidad en pantalla y renderizado.
  */
 public class PipeTest {
-
     private static final int START_X = 100;
-    private static final int WIDTH = 50;
-    private static final int HEIGHT = 200;
+    private static final int WIDTH   = 50;
+    private static final int HEIGHT  = 200;
 
     private BufferedImage dummyHead;
     private BufferedImage dummyBody;
-    private Pipe topPipe;
-    private Pipe bottomPipe;
+    private Pipe          topPipe;
+    private Pipe          bottomPipe;
 
     /**
      * @brief Crea imágenes de prueba y tuberías (superior e inferior) antes de cada test.
@@ -35,7 +33,7 @@ public class PipeTest {
         dummyHead = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
         dummyBody = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
 
-        topPipe = new Pipe(START_X, WIDTH, HEIGHT, true, dummyHead, dummyBody);
+        topPipe    = new Pipe(START_X, WIDTH, HEIGHT, true, dummyHead, dummyBody);
         bottomPipe = new Pipe(START_X, WIDTH, HEIGHT, false, dummyHead, dummyBody);
     }
 
@@ -46,8 +44,7 @@ public class PipeTest {
     void testUpdateStateMovesLeftByThree() {
         float initialX = topPipe.getX();
         topPipe.updateState();
-        assertEquals(initialX - 3, topPipe.getX(), 0.001,
-                "updateState() debe reducir x en 3");
+        assertEquals(initialX - 3, topPipe.getX(), 0.001, "updateState() debe reducir x en 3");
     }
 
     /**
@@ -75,8 +72,8 @@ public class PipeTest {
      */
     @Test
     void testGetBoundsBottom() {
-        Rectangle bounds = bottomPipe.getBounds();
-        int expectedY = GameModel.HEIGHT - HEIGHT;
+        Rectangle bounds    = bottomPipe.getBounds();
+        int       expectedY = GameModel.HEIGHT - HEIGHT;
         assertEquals(START_X, bounds.x);
         assertEquals(expectedY, bounds.y);
         assertEquals(WIDTH, bounds.width);
@@ -97,8 +94,8 @@ public class PipeTest {
      */
     @Test
     void testIsOffScreenFalseWhenVisible() {
-        assertFalse(topPipe.isOffScreen(),
-                "isOffScreen() debe ser false cuando la tubería aún es visible");
+        assertFalse(
+            topPipe.isOffScreen(), "isOffScreen() debe ser false cuando la tubería aún es visible");
     }
 
     /**
@@ -106,7 +103,8 @@ public class PipeTest {
      */
     @Test
     void testDrawDoesNotThrow() {
-        BufferedImage canvas = new BufferedImage(800, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage canvas =
+            new BufferedImage(800, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = canvas.createGraphics();
         assertDoesNotThrow(() -> {
             topPipe.draw(g2d);

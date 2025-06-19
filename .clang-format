@@ -25,5 +25,4 @@ AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 SpacesInConditionalStatement: true
 SpaceBeforeAssignmentOperators: true
-JavaPackageDeclarationIndent: 0
 IndentCaseLabels: true

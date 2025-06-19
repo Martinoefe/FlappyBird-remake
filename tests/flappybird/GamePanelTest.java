@@ -1,12 +1,12 @@
 package flappybird;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import javax.swing.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @class GamePanelTest
@@ -16,10 +16,9 @@ import java.awt.image.BufferedImage;
  * tanto en estado pausado como en ejecución.
  */
 public class GamePanelTest {
-
     private GamePanel panel;
     private GameModel model;
-    private boolean setupExitoso = false;
+    private boolean   setupExitoso = false;
 
     /**
      * @brief Inicializa el modelo y el panel antes de cada prueba.
@@ -27,10 +26,10 @@ public class GamePanelTest {
     @BeforeEach
     public void setUp() {
         try {
-            model = new GameModel();
-            panel = new GamePanel(model);
+            model        = new GameModel();
+            panel        = new GamePanel(model);
             setupExitoso = (model != null && panel != null);
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             setupExitoso = false;
         }
     }
@@ -40,7 +39,8 @@ public class GamePanelTest {
      */
     @Test
     public void testPanelConstruction() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
         assertNotNull(panel);
     }
 
@@ -49,11 +49,11 @@ public class GamePanelTest {
      */
     @Test
     public void testPaintComponentRunsWithoutError() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
-        BufferedImage fakeScreen = new BufferedImage(
-                GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB
-        );
+        BufferedImage fakeScreen =
+            new BufferedImage(GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
         Graphics g = fakeScreen.getGraphics();
 
         assertDoesNotThrow(() -> panel.paintComponent(g));
@@ -64,12 +64,12 @@ public class GamePanelTest {
      */
     @Test
     public void testPaintComponentWhilePaused() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         model.setPaused(true);
-        BufferedImage fakeScreen = new BufferedImage(
-                GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB
-        );
+        BufferedImage fakeScreen =
+            new BufferedImage(GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
         Graphics g = fakeScreen.getGraphics();
 
         assertDoesNotThrow(() -> panel.paintComponent(g));
@@ -80,15 +80,15 @@ public class GamePanelTest {
      */
     @Test
     public void testPaintComponentWhilePlaying() {
-        if (!setupExitoso) return;
+        if ( !setupExitoso )
+            return;
 
         model.setPaused(false);
         model.getBird().jump();
         model.updateGameFrame();
 
-        BufferedImage fakeScreen = new BufferedImage(
-                GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB
-        );
+        BufferedImage fakeScreen =
+            new BufferedImage(GameModel.WIDTH, GameModel.HEIGHT, BufferedImage.TYPE_INT_ARGB);
         Graphics g = fakeScreen.getGraphics();
 
         assertDoesNotThrow(() -> panel.paintComponent(g));
