@@ -8,15 +8,28 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @class GameModelTest
+ * @brief Pruebas unitarias para la clase GameModel del juego Flappy Bird.
+ *
+ * Verifica el estado inicial, el comportamiento de salto, el reinicio del juego,
+ * el avance de puntaje y la generación de obstáculos.
+ */
 public class GameModelTest {
 
     private GameModel model;
 
+    /**
+     * @brief Inicializa una nueva instancia de GameModel antes de cada prueba.
+     */
     @BeforeEach
     void setUp() {
         model = new GameModel();
     }
 
+    /**
+     * @test Verifica el estado inicial del modelo: juego pausado, score cero y sin entidades en pantalla.
+     */
     @Test
     void testInitialState() {
         assertTrue(model.isPaused(), "Debe iniciar en paused=true");
@@ -26,57 +39,65 @@ public class GameModelTest {
         assertTrue(model.getDefenders().isEmpty(), "No debe haber defensores al inicio");
     }
 
+    /**
+     * @test Verifica que al despausar y ejecutar birdJump seguido de updateGameFrame,
+     * el pájaro se mueva hacia arriba.
+     */
     @Test
     void testSetPausedAndBirdJump() {
         model.setPaused(false);
         assertFalse(model.isPaused(), "setPaused(false) debe despausar");
+
         model.birdJump();
-        // Después de birdJump + updateGameFrame, la y del bird debe disminuir
         float beforeY = model.getBird().getBounds().y;
         model.updateGameFrame();
         float afterY = model.getBird().getBounds().y;
         assertTrue(afterY < beforeY, "Después de birdJump y updateGameFrame, Y debe disminuir");
     }
 
+    /**
+     * @test Verifica que resetGame() limpie correctamente el estado del juego.
+     */
     @Test
     void testResetGameClearsState() throws Exception {
-        // Despausar para que updateGameFrame() haga todo el ciclo
         model.setPaused(false);
-        model.birdJump(); // solo para cambiar algo en el estado
+        model.birdJump();
 
-        // Forzar scroll=89, tras updateGameFrame() será 90 → genera pipes
-        setScroll(model, 89);
+        setScroll(model, 89); // Forzar estado para generar pipes en el siguiente frame
         model.updateGameFrame();
-        assertFalse(model.getPipes().isEmpty(),
-                "Debe generarse pipes cuando scroll pasa de 89 a 90");
+        assertFalse(model.getPipes().isEmpty(), "Debe generarse pipes cuando scroll pasa de 89 a 90");
 
-        // Ahora resetear y comprobar limpieza total
         model.resetGame();
-        assertTrue(model.isPaused(),    "resetGame debe pausar el juego");
-        assertEquals(0, model.getScore(),      "resetGame debe reiniciar puntaje");
-        assertTrue(model.getPipes().isEmpty(),"resetGame debe limpiar pipes");
-        assertTrue(model.getPowerUps().isEmpty(),"resetGame debe limpiar powerUps");
-        assertTrue(model.getDefenders().isEmpty(),"resetGame debe limpiar defenders");
+
+        assertTrue(model.isPaused(), "resetGame debe pausar el juego");
+        assertEquals(0, model.getScore(), "resetGame debe reiniciar puntaje");
+        assertTrue(model.getPipes().isEmpty(), "resetGame debe limpiar pipes");
+        assertTrue(model.getPowerUps().isEmpty(), "resetGame debe limpiar powerUps");
+        assertTrue(model.getDefenders().isEmpty(), "resetGame debe limpiar defenders");
     }
 
-
+    /**
+     * @test Verifica que updateGameFrame() incremente el puntaje y el valor de scroll.
+     */
     @Test
     void testScoreAndScrollIncrement() throws Exception {
         int initialScore = model.getScore();
-        // Llamar varias veces updateGameFrame sin colisiones
         model.setPaused(false);
         model.updateGameFrame();
+
         assertEquals(initialScore + 1, model.getScore(), "Cada tick incrementa score en 1");
-        // Verificar que scroll también sube
+
         Field scrollField = GameModel.class.getDeclaredField("scroll");
         scrollField.setAccessible(true);
         int scroll = scrollField.getInt(model);
         assertEquals(1, scroll, "Cada tick incrementa scroll en 1");
     }
 
+    /**
+     * @test Verifica que se generen dos pipes cuando el scroll alcanza múltiplos de 90.
+     */
     @Test
     void testGeneratePipesAtInterval() throws Exception {
-        // Forzar scroll a 89 para que al next tick sea 90
         setScroll(model, 89);
         model.setPaused(false);
         model.updateGameFrame();
@@ -84,7 +105,11 @@ public class GameModelTest {
         assertEquals(2, pipes.size(), "Al cumple scroll%90==0 debe generarse 2 pipes");
     }
 
-    // Helpers para manipular scroll con reflexión
+    /**
+     * @brief Modifica el valor interno de la variable scroll mediante reflexión.
+     * @param m Instancia de GameModel.
+     * @param value Valor a establecer en scroll.
+     */
     private void setScroll(GameModel m, int value) throws Exception {
         Field f = GameModel.class.getDeclaredField("scroll");
         f.setAccessible(true);

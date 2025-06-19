@@ -6,17 +6,31 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.Rectangle;
 
+/**
+ * @class BirdTest
+ * @brief Conjunto de pruebas unitarias para la clase Bird del juego Flappy Bird.
+ *
+ * Esta clase verifica el comportamiento del pájaro respecto a su posición inicial,
+ * capacidad de salto, invencibilidad, modo mini, y reinicio de estado.
+ */
 public class BirdTest {
+
     private Bird bird;
 
+    /**
+     * @brief Inicializa una nueva instancia de Bird antes de cada test.
+     */
     @BeforeEach
     public void setUp() {
         bird = new Bird();
     }
 
+    /**
+     * @test Verifica que la posición inicial del pájaro sea la esperada.
+     * Comprueba tanto el centro del hitbox como la coordenada Y.
+     */
     @Test
     public void testInitialPosition() {
-        // Debido al redondeo en ambos ejes, el centro X/Y del hitbox queda en mitad + 0.5
         float expectedCenterX = GameModel.WIDTH  / 2f + 0.5f;
         float expectedCenterY = GameModel.HEIGHT / 2f + 0.5f;
 
@@ -30,13 +44,15 @@ public class BirdTest {
                 0.01f,
                 "El centerY del hitbox debe ser HEIGHT/2 + 0.5");
 
-        // bird.getY() sigue siendo HEIGHT/2 exacto
         assertEquals(GameModel.HEIGHT / 2f,
                 bird.getY(),
                 0.01f,
                 "Y debe estar en HEIGHT/2");
     }
 
+    /**
+     * @test Verifica que el método jump() seguido de updateState() disminuya la posición Y.
+     */
     @Test
     public void testJumpChangesVerticalPosition() {
         float initialY = bird.getY();
@@ -46,6 +62,9 @@ public class BirdTest {
                 "Después de jump() y updateState(), Y debe disminuir");
     }
 
+    /**
+     * @test Verifica la activación y expiración del estado de invencibilidad.
+     */
     @Test
     public void testInvincibilityActivationAndExpiration() {
         bird.makeInvincible(2);
@@ -55,6 +74,9 @@ public class BirdTest {
         assertFalse(bird.isInvincible(), "La invencibilidad debe expirar tras 2 frames");
     }
 
+    /**
+     * @test Verifica la activación y expiración del modo mini.
+     */
     @Test
     public void testMiniActivationAndExpiration() {
         bird.makeMini(2);
@@ -64,6 +86,9 @@ public class BirdTest {
         assertFalse(bird.isMini(), "El modo mini debe expirar tras 2 frames");
     }
 
+    /**
+     * @test Verifica que el tamaño del hitbox sea menor cuando el pájaro está en modo mini.
+     */
     @Test
     public void testBoundsAreSmallerWhenMini() {
         Rectangle normal = bird.getBounds();
@@ -77,6 +102,9 @@ public class BirdTest {
                 "Cuando está mini, la altura del hitbox debe ser menor");
     }
 
+    /**
+     * @test Verifica que el método reset() restaure el estado inicial del pájaro.
+     */
     @Test
     public void testResetRestoresInitialState() {
         bird.jump();

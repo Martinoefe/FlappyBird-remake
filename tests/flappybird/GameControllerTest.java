@@ -10,13 +10,24 @@ import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @class GameControllerTest
+ * @brief Pruebas unitarias para la clase GameController del juego Flappy Bird.
+ *
+ * Utiliza stubs para verificar interacciones con GameModel y GamePanel.
+ */
 public class GameControllerTest {
 
     private GameController controller;
     private StubModel stubModel;
     private StubPanel stubPanel;
 
-    /** Un GameModel de prueba que cuenta llamadas */
+    /**
+     * @class StubModel
+     * @brief Implementación simulada de GameModel para pruebas.
+     *
+     * Rastrea llamadas a métodos clave como updateGameFrame, resetGame y birdJump.
+     */
     private static class StubModel extends GameModel {
         boolean updateCalled = false;
         boolean resetCalled = false;
@@ -31,7 +42,6 @@ public class GameControllerTest {
         @Override
         public void updateGameFrame() {
             updateCalled = true;
-            // Simular continuación sin game over
             pausedState = false;
         }
 
@@ -51,7 +61,12 @@ public class GameControllerTest {
         }
     }
 
-    /** Un GamePanel de prueba que rastrea repaint() */
+    /**
+     * @class StubPanel
+     * @brief Implementación simulada de GamePanel para pruebas.
+     *
+     * Rastrea llamadas al método repaint().
+     */
     private static class StubPanel extends GamePanel {
         boolean repaintCalled = false;
 
@@ -65,33 +80,35 @@ public class GameControllerTest {
         }
     }
 
+    /**
+     * @brief Inicializa un GameController con instancias simuladas de modelo y vista.
+     * Detiene el timer para evitar efectos secundarios durante las pruebas.
+     */
     @BeforeEach
     void setUp() throws Exception {
         controller = new GameController();
         stubModel = new StubModel();
         stubPanel = new StubPanel(stubModel);
 
-        // Inyectar stubModel
         Field modelField = GameController.class.getDeclaredField("model");
         modelField.setAccessible(true);
         modelField.set(controller, stubModel);
 
-        // Inyectar stubPanel como view
         Field viewField = GameController.class.getDeclaredField("view");
         viewField.setAccessible(true);
         viewField.set(controller, stubPanel);
 
-        // Detener el timer para que no dispare durante los tests
         Field timerField = GameController.class.getDeclaredField("timer");
         timerField.setAccessible(true);
         ((Timer) timerField.get(controller)).stop();
     }
 
+    /**
+     * @test Verifica que cuando el juego no está pausado, se actualiza el modelo y se repinta la vista.
+     */
     @Test
     void testActionPerformedWhenUnpausedUpdatesAndRepaints() {
-        // Simular que no está pausado
         stubModel.pausedState = false;
-
         controller.actionPerformed(new ActionEvent(this, 0, null));
 
         assertTrue(stubModel.updateCalled,
@@ -100,9 +117,11 @@ public class GameControllerTest {
                 "Cuando no está pausado, actionPerformed debe llamar repaint() en la vista");
     }
 
+    /**
+     * @test Verifica que si el juego está pausado, no se actualiza el modelo pero sí se repinta la vista.
+     */
     @Test
     void testActionPerformedWhenPausedDoesNotUpdateButRepaints() {
-        // Dejar pausedState = true (estado inicial)
         controller.actionPerformed(new ActionEvent(this, 0, null));
 
         assertFalse(stubModel.updateCalled,
@@ -111,6 +130,9 @@ public class GameControllerTest {
                 "Aunque esté pausado, actionPerformed SIEMPRE debe llamar repaint()");
     }
 
+    /**
+     * @test Verifica que al presionar la tecla 'arriba' (UP), se invoque el salto del pájaro.
+     */
     @Test
     void testKeyPressedUpTriggersJump() {
         controller.keyPressed(new KeyEvent(new JFrame(), 0, 0, 0, KeyEvent.VK_UP, ' '));
@@ -119,6 +141,9 @@ public class GameControllerTest {
                 "Al presionar VK_UP, keyPressed debe llamar birdJump()");
     }
 
+    /**
+     * @test Verifica que al presionar la tecla 'espacio' (SPACE), se quite la pausa del juego.
+     */
     @Test
     void testKeyPressedSpaceUnpauses() {
         stubModel.pausedState = true;
