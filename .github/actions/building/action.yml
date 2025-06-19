@@ -1,5 +1,5 @@
 name: 'Building Action Simple'
-description: 'Compila con javac y ejecuta GameController directamente sin Maven.'
+description: 'Compila con javac y ejecuta GameController directamente, listando workspace para diagnosticar rutas de imágenes.'
 
 inputs:
   distribution:
@@ -10,6 +10,10 @@ inputs:
     description: 'Versión de Java'
     required: true
     default: '11'
+  ci-arg:
+    description: 'Argumento para modo CI en GameController, e.g., --ci'
+    required: false
+    default: '--ci'
 
 runs:
   using: 'composite'
@@ -29,9 +33,7 @@ runs:
       shell: bash
       run: |
         echo "Compilando fuentes de src/flappybird..."
-        # Directorio de salida para .class
         mkdir -p bin
-        # Encontrar todos los .java bajo src/flappybird
         files=$(find src/flappybird -name "*.java")
         if [ -z "$files" ]; then
           echo "No se encontraron archivos .java en src/flappybird"
@@ -39,25 +41,20 @@ runs:
         fi
         javac -d bin $files
 
-    - name: Asegurar carpeta images disponible
+    - name: Listar workspace para diagnóstico
       shell: bash
       run: |
-        # Verificamos que exista la carpeta images en la raíz
-        if [ ! -d "images" ]; then
-          echo "No existe la carpeta images/ en el workspace; asegúrate de que el repositorio tenga images/"
-          exit 1
-        fi
-        # Opcional: listar contenido
-        echo "Contenido de images/:"
-        ls images
+        echo "Directorio de trabajo: $(pwd)"
+        echo "Contenido del workspace:"
+        ls -R .
 
-    - name: Ejecutar GameController
+    - name: Ejecutar GameController en modo CI
       shell: bash
       run: |
         echo "Ejecutando GameController..."
-        # Si tu GameController abre GUI, usar xvfb-run; si no, basta java.
+        # Ajusta para aceptar el argumento --ci si tu código lo soporta
         if command -v xvfb-run >/dev/null; then
-          xvfb-run java -cp bin flappybird.GameController
+          xvfb-run java -cp bin flappybird.GameController ${{ inputs.ci-arg }}
         else
-          java -cp bin flappybird.GameController
+          java -cp bin flappybird.GameController ${{ inputs.ci-arg }}
         fi
