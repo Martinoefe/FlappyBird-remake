@@ -1,5 +1,5 @@
 name: 'Building Action'
-description: 'Genera un pom.xml dinámico (incluyendo imágenes) y ejecuta GameController mediante Maven.'
+description: 'Genera un pom.xml dinámico (incluyendo recursos como imágenes) y ejecuta GameController mediante Maven.'
 
 inputs:
   distribution:
@@ -12,7 +12,7 @@ inputs:
     default: '11'
   build-command:
     description: >-
-      Parte del comando Maven a ejecutar, p. ej.:
+      Parte del comando Maven a ejecutar, por ejemplo:
       'compile exec:java -Dexec.mainClass="flappybird.GameController"'.
     required: true
     default: 'compile exec:java -Dexec.mainClass="flappybird.GameController"'
@@ -20,6 +20,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # 1. Generar el pom.xml dinámico ANTES de setup-java con cache, 
+    #    para que actions/setup-java@v3 encuentre el pom.xml al aplicar cache :contentReference[oaicite:0]{index=0}.
     - name: Generar pom.xml dinámico con recursos
       shell: bash
       run: |
@@ -40,6 +42,7 @@ runs:
             <jacoco.plugin.version>0.8.10</jacoco.plugin.version>
           </properties>
           <dependencies>
+            <!-- Incluimos JUnit en scope test para que el POM sea válido si en tests usamos mvn test -->
             <dependency>
               <groupId>org.junit.jupiter</groupId>
               <artifactId>junit-jupiter</artifactId>
@@ -48,11 +51,11 @@ runs:
             </dependency>
           </dependencies>
           <build>
-            <!-- Directorios de código fuente y tests personalizados -->
+            <!-- Directorios personalizados de fuentes y tests -->
             <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
             <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
 
-            <!-- Incluir carpeta de imágenes como recurso -->
+            <!-- Incluir la carpeta de imágenes como recurso, para que ImageIO.read getResource(...) no devuelva null :contentReference[oaicite:1]{index=1} -->
             <resources>
               <resource>
                 <directory>${project.basedir}/images</directory>
@@ -60,6 +63,7 @@ runs:
             </resources>
 
             <plugins>
+              <!-- Compilador Java -->
               <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
@@ -68,14 +72,17 @@ runs:
                   <target>${maven.compiler.target}</target>
                 </configuration>
               </plugin>
+              <!-- Plugin para ejecutar la clase principal -->
               <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
+                  <!-- Este mainClass es el default en POM, pero el comando Maven que reciba build-command puede sobreescribir vía -Dexec.mainClass -->
                   <mainClass>flappybird.GameController</mainClass>
                 </configuration>
               </plugin>
+              <!-- Plugin JaCoCo para instrumentar tests y generar reporte -->
               <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -96,30 +103,42 @@ runs:
           </build>
         </project>
         EOF
-        echo "POM dinámico (incluyendo images/) generado:"
+        echo "POM dinámico (incluyendo carpeta images/) generado:"
         cat pom.xml
 
+    # 2. Setup de Java y cache de Maven. Ahora pom.xml existe, así cache funcionará sin error “No file matched to [**/pom.xml]” :contentReference[oaicite:2]{index=2}.
     - name: Setup Java y Maven (cache de Maven)
       uses: actions/setup-java@v3
       with:
         distribution: ${{ inputs.distribution }}
         java-version: ${{ inputs.java-version }}
-        cache: 'maven'   # Ahora que pom.xml existe, cache funcionará sin error :contentReference[oaicite:1]{index=1}.
+        cache: 'maven'
 
+    # 3. Mostrar versiones para debug
     - name: Mostrar versiones Java y Maven
       shell: bash
       run: |
         java -version
         mvn -v
 
+    # 4. Ejecutar el comando de build. 
     - name: Ejecutar build-command con Maven
       shell: bash
       run: |
-        echo "Ejecutando: mvn ${{ inputs.build-command }}"
+        echo "Ejecutando: mvn {{ inputs.build-command }}"
+        # Primero compilamos
         mvn compile
+        # Luego ejecutamos la parte indicada
         mvn ${{ inputs.build-command }}
+        # Si tu aplicación abre GUI y necesitas framebuffer, podrías envolver con xvfb-run:
+        # if command -v xvfb-run >/dev/null; then
+        #   xvfb-run mvn ${{ inputs.build-command }}
+        # else
+        #   mvn ${{ inputs.build-command }}
+        # fi
 
-    - name: Confirmar éxito
+    # 5. Confirmar éxito
+    - name: Confirmar Build & Run
       if: ${{ success() }}
       shell: bash
       run: echo "Build & Run completado exitosamente."
