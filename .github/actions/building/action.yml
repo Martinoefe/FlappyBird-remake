@@ -1,18 +1,18 @@
 name: 'Building Action'
-description: 'Genera un pom.xml dinámico y ejecuta la clase principal (GameController) mediante Maven, usando cache de Maven si se desea.'
+description: 'Genera un pom.xml dinámico (incluyendo imágenes) y ejecuta GameController mediante Maven.'
 
 inputs:
   distribution:
-    description: 'Distribución de JDK para setup-java (e.g., temurin)'
+    description: 'Distribución de JDK para setup-java'
     required: true
     default: 'temurin'
   java-version:
-    description: 'Versión de Java a usar'
+    description: 'Versión de Java'
     required: true
     default: '11'
   build-command:
     description: >-
-      Parte del comando Maven a ejecutar, por ejemplo:
+      Parte del comando Maven a ejecutar, p. ej.:
       'compile exec:java -Dexec.mainClass="flappybird.GameController"'.
     required: true
     default: 'compile exec:java -Dexec.mainClass="flappybird.GameController"'
@@ -20,7 +20,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Generar pom.xml dinámico
+    - name: Generar pom.xml dinámico con recursos
       shell: bash
       run: |
         cat << 'EOF' > pom.xml
@@ -48,8 +48,17 @@ runs:
             </dependency>
           </dependencies>
           <build>
+            <!-- Directorios de código fuente y tests personalizados -->
             <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
             <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
+
+            <!-- Incluir carpeta de imágenes como recurso -->
+            <resources>
+              <resource>
+                <directory>${project.basedir}/images</directory>
+              </resource>
+            </resources>
+
             <plugins>
               <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -87,7 +96,7 @@ runs:
           </build>
         </project>
         EOF
-        echo "POM dinámico generado para build:"
+        echo "POM dinámico (incluyendo images/) generado:"
         cat pom.xml
 
     - name: Setup Java y Maven (cache de Maven)
@@ -95,7 +104,7 @@ runs:
       with:
         distribution: ${{ inputs.distribution }}
         java-version: ${{ inputs.java-version }}
-        cache: 'maven'   # Ahora el pom.xml ya existe, cache puede encontrarlo :contentReference[oaicite:1]{index=1}.
+        cache: 'maven'   # Ahora que pom.xml existe, cache funcionará sin error :contentReference[oaicite:1]{index=1}.
 
     - name: Mostrar versiones Java y Maven
       shell: bash
@@ -107,14 +116,8 @@ runs:
       shell: bash
       run: |
         echo "Ejecutando: mvn ${{ inputs.build-command }}"
-        mvn compile   # asegúrate de compilar antes, aunque build-command incluya compile
+        mvn compile
         mvn ${{ inputs.build-command }}
-        # Si tu aplicación abre GUI, podrías usar xvfb-run:
-        # if command -v xvfb-run >/dev/null; then
-        #   xvfb-run mvn ${{ inputs.build-command }}
-        # else
-        #   mvn ${{ inputs.build-command }}
-        # fi
 
     - name: Confirmar éxito
       if: ${{ success() }}
