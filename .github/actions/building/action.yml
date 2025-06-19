@@ -1,54 +1,135 @@
-name: 'Build Java Project'
-description: 'Compila el proyecto Java usando Maven o comando personalizado.'
+name: 'Building Action'
+description: 'Genera un pom.xml dinámico y ejecuta la clase principal (GameController) mediante Maven.'
 
-# Definimos inputs que la acción espera
 inputs:
   distribution:
-    description: 'Distribución de JDK para setup-java (por ejemplo, temurin, zulu, adopt, etc.)'
+    description: 'Distribución de JDK para setup-java (e.g., temurin)'
     required: true
     default: 'temurin'
   java-version:
-    description: 'Versión de Java a usar (por ejemplo, 8, 11, 17)'
+    description: 'Versión de Java a usar'
     required: true
     default: '11'
   build-command:
     description: >-
-      Comando de build a ejecutar en el proyecto.
-      Por defecto se asume Maven: 'mvn -B clean compile'.
-      Si usas IntelliJ CLI, pasa aquí el comando apropiado, p.ej. 'ij-cli-command ...'.
-    required: false
-    default: 'mvn -B clean compile'
+      Parte del comando Maven a ejecutar, por ejemplo:
+      'compile exec:java -Dexec.mainClass="flappybird.GameController"'.
+    required: true
+    default: 'compile exec:java -Dexec.mainClass="flappybird.GameController"'
 
 runs:
   using: 'composite'
   steps:
-    # 1. Setup Java
-    - name: Setup Java
+    - name: Setup Java y Maven
       uses: actions/setup-java@v3
       with:
         distribution: ${{ inputs.distribution }}
         java-version: ${{ inputs.java-version }}
         cache: 'maven'
 
-    # 2. (Opcional) Instalar Maven si no lo tienes o si no confías en el que venga con el runner.
-    # Si prefieres usar mvnw (Maven Wrapper) y tu repo lo incluye, puedes omitir este paso.
-    # - name: Ensure Maven available
-    #   run: |
-    #     if ! command -v mvn >/dev/null; then
-    #       sudo apt-get update
-    #       sudo apt-get install -y maven
-    #     fi
-
-    # 3. Ejecutar el comando de build pasado como input
-    - name: Run build command
+    - name: Mostrar versiones Java y Maven
       shell: bash
       run: |
-        echo "Ejecutando comando de build: ${{ inputs.build-command }}"
-        # Si tu build-command es algo como "mvn -B clean compile", se ejecuta aquí.
-        # Si usas mvnw, podrías verificar si existe y prefijar './mvnw' en lugar de 'mvn'.
-        ${{ inputs.build-command }}
+        java -version
+        mvn -v
 
-    # 4. Verificar éxito (opcional)
-    - name: Verify build succeeded
+    - name: Generar pom.xml dinámico
+      shell: bash
+      run: |
+        cat << 'EOF' > pom.xml
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                                     http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>com.usuario.flappybird</groupId>
+          <artifactId>flappybird</artifactId>
+          <version>1.0-SNAPSHOT</version>
+          <properties>
+            <maven.compiler.source>11</maven.compiler.source>
+            <maven.compiler.target>11</maven.compiler.target>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            <junit.jupiter.version>5.9.2</junit.jupiter.version>
+            <jacoco.plugin.version>0.8.10</jacoco.plugin.version>
+          </properties>
+          <dependencies>
+            <!-- Dependencia de JUnit Jupiter para tests; aunque en build no se ejecute tests,
+                 la incluimos para que el POM sea válido si se ejecuta mvn test en otro job -->
+            <dependency>
+              <groupId>org.junit.jupiter</groupId>
+              <artifactId>junit-jupiter</artifactId>
+              <version>${junit.jupiter.version}</version>
+              <scope>test</scope>
+            </dependency>
+          </dependencies>
+          <build>
+            <!-- Directorio de fuentes personalizado -->
+            <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
+            <!-- Directorio de tests, necesario para que mvn test funcione en job de tests -->
+            <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
+            <plugins>
+              <!-- Compilador Java -->
+              <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                  <source>${maven.compiler.source}</source>
+                  <target>${maven.compiler.target}</target>
+                </configuration>
+              </plugin>
+              <!-- Plugin para ejecutar la clase principal -->
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                  <!-- Este mainClass se usará si el workflow no proporciona otro -->
+                  <mainClass>flappybird.GameController</mainClass>
+                </configuration>
+              </plugin>
+              <!-- Plugin JaCoCo para instrumentar tests y generar reporte; 
+                   en build no se ejecuta test, pero se incluye para consistencia -->
+              <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.plugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>prepare-agent</id>
+                    <goals><goal>prepare-agent</goal></goals>
+                  </execution>
+                  <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals><goal>report</goal></goals>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </project>
+        EOF
+        echo "POM dinámico generado:"
+        cat pom.xml  # para debug en logs
+      # Personalización: El uso de <sourceDirectory> y <testSourceDirectory> 
+      # en pom.xml permite que Maven compile desde carpetas distintas a src/main/java y src/test/java :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.
+
+    - name: Ejecutar build-command con Maven
+      shell: bash
+      run: |
+        echo "Ejecutando: mvn ${{ inputs.build-command }}"
+        # Primero compila
+        mvn compile
+        # Luego ejecuta la parte exec:java si build-command la incluye
+        mvn ${{ inputs.build-command }}
+        # Si tu aplicación abre GUI, puedes envolver en xvfb-run:
+        # if command -v xvfb-run >/dev/null; then
+        #   xvfb-run mvn ${{ inputs.build-command }}
+        # else
+        #   mvn ${{ inputs.build-command }}
+        # fi
+
+    - name: Confirmar éxito
       if: ${{ success() }}
-      run: echo "Build action completed successfully."
+      shell: bash
+      run: echo "Build & Run completado exitosamente."
