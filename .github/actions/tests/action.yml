@@ -1,33 +1,41 @@
-name: "Test Action Simple"
-description: "Compila y ejecuta tests Java sin Maven usando JUnit 5"
+name: "Run Tests & Coverage"
+description: "Compile, run JUnit tests and generate coverage report with JaCoCo"
 
 runs:
   using: "composite"
   steps:
-    - name: Instalar Java 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
 
-    - name: Descargar JUnit
+    # … pasos previos: setup-java, compile, descargar junit …
+
+    - name: Descargar JaCoCo
       shell: bash
       run: |
         mkdir -p libs
-        curl -L -o libs/junit-platform-console-standalone.jar \
-          https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.9.3/junit-platform-console-standalone-1.9.3.jar
+        curl -L -o libs/jacocoagent.jar \
+             https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.10/org.jacoco.agent-0.8.10-runtime.jar
+        curl -L -o libs/jacococli.jar \
+             https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.10/org.jacoco.cli-0.8.10-nodeps.jar
 
-    - name: Compilar código
+    - name: Ejecutar tests con cobertura
       shell: bash
       run: |
-        mkdir -p out
-        find src -name "*.java" > sources.txt
-        find tests -name "*.java" > tests.txt
-        javac -d out @sources.txt @tests.txt -cp libs/junit-platform-console-standalone.jar
+        # inyectamos el agente con destfile=coverage.exec
+        java -javaagent:libs/jacocoagent.jar=destfile=coverage.exec \
+             -jar libs/junit-platform-console-standalone.jar \
+             --classpath out --scan-classpath
 
-    - name: Ejecutar tests
+    - name: Generar reporte JaCoCo
       shell: bash
       run: |
-        java -jar libs/junit-platform-console-standalone.jar \
-          --classpath out \
-          --scan-classpath
+        mkdir -p coverage-report
+        java -jar libs/jacococli.jar report coverage.exec \
+             --classfiles out \
+             --sourcefiles src/flappybird \
+             --html coverage-report \
+             --xml coverage-report/coverage.xml
+
+    - name: Publicar reporte de cobertura
+      uses: actions/upload-artifact@v4
+      with:
+        name: cobertura-report
+        path: coverage-report
