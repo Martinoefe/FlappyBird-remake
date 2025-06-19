@@ -11,24 +11,24 @@ runs:
       shell: bash
       run: |
         mkdir -p libs
-        curl -L -o libs/jacocoagent.jar \
+        curl -L -o lib/jacocoagent.jar \
              https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.10/org.jacoco.agent-0.8.10-runtime.jar
-        curl -L -o libs/jacococli.jar \
+        curl -L -o lib/jacococli.jar \
              https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.10/org.jacoco.cli-0.8.10-nodeps.jar
 
     - name: Ejecutar tests con cobertura
       shell: bash
       run: |
         # inyectamos el agente con destfile=coverage.exec
-        java -javaagent:libs/jacocoagent.jar=destfile=coverage.exec \
-             -jar libs/junit-platform-console-standalone.jar \
+        java -javaagent:lib/jacocoagent.jar=destfile=coverage.exec \
+             -jar lib/junit-platform-console-standalone.jar \
              --classpath out --scan-classpath
 
     - name: Generar reporte JaCoCo
       shell: bash
       run: |
         mkdir -p coverage-report
-        java -jar libs/jacococli.jar report coverage.exec \
+        java -jar lib/jacococli.jar report coverage.exec \
              --classfiles out \
              --sourcefiles src/flappybird \
              --html coverage-report \
