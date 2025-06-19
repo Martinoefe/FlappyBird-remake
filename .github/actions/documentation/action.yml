@@ -1,0 +1,26 @@
+name: Documentation
+description: Generate and validate Doxygen docs.
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure Doxyfile exists
+      run: |
+        if [ ! -f Doxyfile ]; then
+          echo "Creating minimal Doxyfile…"
+          cat > Doxyfile <<EOF
+          PROJECT_NAME = "FlappyMessi"
+          OUTPUT_DIRECTORY = docs
+          INPUT = src/flappybird
+          RECURSIVE = YES
+          GENERATE_LATEX = NO
+          EOF
+        fi
+
+    - name: Install doxygen
+      run: sudo apt-get update && sudo apt-get install -y doxygen
+
+    - name: Run doxygen
+      run: doxygen Doxyfile
+
+    - name: Check that docs/index.html was generated
+      run: test -f docs/html/index.html
