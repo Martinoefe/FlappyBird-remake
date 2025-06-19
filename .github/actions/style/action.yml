@@ -34,7 +34,7 @@ runs:
 
     - name: Subir errores (si los hay)
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: clang-format-errors
         path: clang-format-errors.txt
