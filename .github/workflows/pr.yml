@@ -39,12 +39,10 @@ jobs:
           java-version: '11'
 
   tests:
-      name: Run Tests & Coverage
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-    
-        - name: Ejecutar acción de test
-          uses: ./.github/actions/tests
-          with:
-            java-version: '17'
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ejecutar tests
+        uses: ./.github/actions/tests
