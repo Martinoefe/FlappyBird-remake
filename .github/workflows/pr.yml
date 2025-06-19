@@ -2,6 +2,7 @@ name: Pull Request Validation
 
 on:
   pull_request:
+    # Dispara para cualquier cambio en la PR
     paths:
       - '**'
 
@@ -23,25 +24,32 @@ jobs:
         uses: ./.github/actions/style
 
   build:
-    name: Build (Java/IntelliJ CLI)
+    name: Build (Java/IntelliJ CLI o Maven)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-      - name: Run Build Action
-        uses: ./.github/actions/build
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
+      - name: Run Build Action
+        # Invocamos la acción composite de build
+        uses: ./.github/actions/build
+        with:
+          # Pasamos los inputs obligatorios que la acción composite usará
+          distribution: 'temurin'
+          java-version: '11'
+          # Opcional: comando de build, por defecto Maven. Ajusta si usas IntelliJ CLI:
+          # Si tu acción build.yml está preparada para IntelliJ CLI, cambia aquí.
+          build-command: 'mvn -B clean compile'
+          # Si necesitas argumentos adicionales, podrías definir más inputs en action.yml.
+  
   tests:
     name: Tests & Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Run Tests Action
         uses: ./.github/actions/tests
+        with:
+          # Suponie
