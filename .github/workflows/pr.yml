@@ -26,22 +26,22 @@ jobs:
         uses: ./.github/actions/style
 
   build:
-    name: Build (Java/IntelliJ CLI o Maven)
+    name: Build & Run GameController
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run Build Action
-        # Usamos la carpeta correcta: "building"
+      - name: Run Building Action
         uses: ./.github/actions/building
         with:
           distribution: 'temurin'
           java-version: '11'
-          build-command: 'mvn -B clean compile'
+          # Comando Maven que compile y ejecute la clase principal.
+          build-command: 'compile exec:java -Dexec.mainClass="flappybird.GameController"'
 
   tests:
-    name: Tests & Coverage
+    name: Run Tests & Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -52,4 +52,5 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          test-command: 'mvn test'
+          # Comando Maven para tests (genera reporte JaCoCo)
+          test-command: 'test'
