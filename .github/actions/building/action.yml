@@ -1,28 +1,54 @@
-name: Build Java project
+name: 'Build Java Project'
+description: 'Compila el proyecto Java usando Maven o comando personalizado.'
 
-on:
-  push:
-    branches: [ Test ]
-  pull_request:
-    branches: [ Test ]
+# Definimos inputs que la acción espera
+inputs:
+  distribution:
+    description: 'Distribución de JDK para setup-java (por ejemplo, temurin, zulu, adopt, etc.)'
+    required: true
+    default: 'temurin'
+  java-version:
+    description: 'Versión de Java a usar (por ejemplo, 8, 11, 17)'
+    required: true
+    default: '11'
+  build-command:
+    description: >-
+      Comando de build a ejecutar en el proyecto.
+      Por defecto se asume Maven: 'mvn -B clean compile'.
+      Si usas IntelliJ CLI, pasa aquí el comando apropiado, p.ej. 'ij-cli-command ...'.
+    required: false
+    default: 'mvn -B clean compile'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+runs:
+  using: 'composite'
+  steps:
+    # 1. Setup Java
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    # 2. (Opcional) Instalar Maven si no lo tienes o si no confías en el que venga con el runner.
+    # Si prefieres usar mvnw (Maven Wrapper) y tu repo lo incluye, puedes omitir este paso.
+    # - name: Ensure Maven available
+    #   run: |
+    #     if ! command -v mvn >/dev/null; then
+    #       sudo apt-get update
+    #       sudo apt-get install -y maven
+    #     fi
 
-      - name: Setup Java (Temurin JDK 11)
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'    # distribución de JDK, por ejemplo 'temurin', 'zulu', etc.
-          java-version: '11'         # versión de Java que necesitas
-          cache: 'maven'             # opcional: cache de dependencias Maven
+    # 3. Ejecutar el comando de build pasado como input
+    - name: Run build command
+      shell: bash
+      run: |
+        echo "Ejecutando comando de build: ${{ inputs.build-command }}"
+        # Si tu build-command es algo como "mvn -B clean compile", se ejecuta aquí.
+        # Si usas mvnw, podrías verificar si existe y prefijar './mvnw' en lugar de 'mvn'.
+        ${{ inputs.build-command }}
 
-      - name: Build with Maven
-        run: mvn -B clean compile
-
-      - name: Verify compilation succeeded
-        run: echo "Build succeeded"
+    # 4. Verificar éxito (opcional)
+    - name: Verify build succeeded
+      if: ${{ success() }}
+      run: echo "Build action completed successfully."
