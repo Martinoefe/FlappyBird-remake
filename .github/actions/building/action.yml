@@ -1,5 +1,5 @@
 name: 'Building Action'
-description: 'Genera un pom.xml dinámico y ejecuta la clase principal (GameController) mediante Maven.'
+description: 'Genera un pom.xml dinámico y ejecuta la clase principal (GameController) mediante Maven, usando cache de Maven si se desea.'
 
 inputs:
   distribution:
@@ -20,19 +20,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup Java y Maven
-      uses: actions/setup-java@v3
-      with:
-        distribution: ${{ inputs.distribution }}
-        java-version: ${{ inputs.java-version }}
-        cache: 'maven'
-
-    - name: Mostrar versiones Java y Maven
-      shell: bash
-      run: |
-        java -version
-        mvn -v
-
     - name: Generar pom.xml dinámico
       shell: bash
       run: |
@@ -53,8 +40,6 @@ runs:
             <jacoco.plugin.version>0.8.10</jacoco.plugin.version>
           </properties>
           <dependencies>
-            <!-- Dependencia de JUnit Jupiter para tests; aunque en build no se ejecute tests,
-                 la incluimos para que el POM sea válido si se ejecuta mvn test en otro job -->
             <dependency>
               <groupId>org.junit.jupiter</groupId>
               <artifactId>junit-jupiter</artifactId>
@@ -63,12 +48,9 @@ runs:
             </dependency>
           </dependencies>
           <build>
-            <!-- Directorio de fuentes personalizado -->
             <sourceDirectory>${project.basedir}/src/flappybird</sourceDirectory>
-            <!-- Directorio de tests, necesario para que mvn test funcione en job de tests -->
             <testSourceDirectory>${project.basedir}/tests/flappybird</testSourceDirectory>
             <plugins>
-              <!-- Compilador Java -->
               <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
@@ -77,18 +59,14 @@ runs:
                   <target>${maven.compiler.target}</target>
                 </configuration>
               </plugin>
-              <!-- Plugin para ejecutar la clase principal -->
               <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                  <!-- Este mainClass se usará si el workflow no proporciona otro -->
                   <mainClass>flappybird.GameController</mainClass>
                 </configuration>
               </plugin>
-              <!-- Plugin JaCoCo para instrumentar tests y generar reporte; 
-                   en build no se ejecuta test, pero se incluye para consistencia -->
               <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -109,20 +87,29 @@ runs:
           </build>
         </project>
         EOF
-        echo "POM dinámico generado:"
-        cat pom.xml  # para debug en logs
-      # Personalización: El uso de <sourceDirectory> y <testSourceDirectory> 
-      # en pom.xml permite que Maven compile desde carpetas distintas a src/main/java y src/test/java :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}.
+        echo "POM dinámico generado para build:"
+        cat pom.xml
+
+    - name: Setup Java y Maven (cache de Maven)
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'   # Ahora el pom.xml ya existe, cache puede encontrarlo :contentReference[oaicite:1]{index=1}.
+
+    - name: Mostrar versiones Java y Maven
+      shell: bash
+      run: |
+        java -version
+        mvn -v
 
     - name: Ejecutar build-command con Maven
       shell: bash
       run: |
         echo "Ejecutando: mvn ${{ inputs.build-command }}"
-        # Primero compila
-        mvn compile
-        # Luego ejecuta la parte exec:java si build-command la incluye
+        mvn compile   # asegúrate de compilar antes, aunque build-command incluya compile
         mvn ${{ inputs.build-command }}
-        # Si tu aplicación abre GUI, puedes envolver en xvfb-run:
+        # Si tu aplicación abre GUI, podrías usar xvfb-run:
         # if command -v xvfb-run >/dev/null; then
         #   xvfb-run mvn ${{ inputs.build-command }}
         # else
